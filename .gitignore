@@ -1,0 +1,30 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Secrets and local config
+backend/.env
+.env
+.env.local
+
+# Uploaded presentations and generated previews
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# MediaPipe model (downloaded by scripts/download_model.py)
+computer_vision/models/*.task
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
