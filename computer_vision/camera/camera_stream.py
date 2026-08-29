@@ -109,7 +109,14 @@ def list_available_cameras(max_index: int = 4) -> list[int]:
     """Probe the first few camera indexes so the UI can offer a real choice."""
     available: list[int] = []
     for index in range(max_index):
+        # Same two-step as open(): CAP_DSHOW is the good Windows backend, but it
+        # does not exist on macOS/Linux, where it fails and the default backend
+        # is the one that works. Without the fallback the picker is empty on
+        # every non-Windows machine even though the camera opens fine.
         capture = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+        if not capture.isOpened():
+            capture.release()
+            capture = cv2.VideoCapture(index)
         if capture.isOpened():
             available.append(index)
         capture.release()

@@ -30,6 +30,19 @@ def start_engine():
     return success(result, "Gesture engine started.")
 
 
+@engine_bp.post("/start-voice")
+@require_auth
+def start_voice_session():
+    """Bind a session for voice control only - no camera is opened."""
+    payload = request.get_json(silent=True) or {}
+    require_fields(payload, ["sessionId"])
+    to_object_id(payload["sessionId"], "session id")
+    result = session_controller.start_voice_session(
+        g.user_id, payload["sessionId"], payload.get("options") or {}
+    )
+    return success(result, "Voice session started.")
+
+
 @engine_bp.post("/stop")
 @require_auth
 def stop_engine():
@@ -48,10 +61,22 @@ def status():
 @engine_bp.post("/command")
 @require_auth
 def manual_command():
+    """Control bar / keyboard fallback - the same dispatch path gestures and voice use."""
     payload = request.get_json(silent=True) or {}
     require_fields(payload, ["command"])
-    record = engine_service.execute_command(g.user_id, payload["command"].upper())
+    record = engine_service.execute_command(
+        g.user_id, payload["command"].upper(), payload.get("parameters") or {},
+    )
     return success({"result": record}, "Command executed.")
+
+
+@engine_bp.get("/commands")
+@require_auth
+def command_catalogue():
+    """Every command the dispatcher can run, and which ones a pose can be bound to."""
+    from computer_vision.command_mapping.gesture_mapper import command_catalogue
+
+    return success({"commands": command_catalogue()})
 
 
 @engine_bp.post("/slide")

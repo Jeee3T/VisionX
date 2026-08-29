@@ -16,7 +16,10 @@ sys.path.insert(0, str(BACKEND_DIR))
 sys.path.insert(0, str(BACKEND_DIR.parent))
 
 from app import app  # noqa: E402
-from config.database import annotations, gesture_preferences, presentation_history, presentations, users  # noqa: E402
+from config.database import (  # noqa: E402
+    annotations, gesture_preferences, gesture_recordings, personalization,
+    presentation_history, presentations, users, voice_commands,
+)
 from bson import ObjectId  # noqa: E402
 
 PASSED: list[str] = []
@@ -47,7 +50,6 @@ def make_pdf(pages: int = 3) -> bytes:
 def run() -> int:
     client = app.test_client()
     email = f"test_{uuid.uuid4().hex[:8]}@visionx.test"
-    user_id = None
 
     try:
         print("\n1. Health")
@@ -59,7 +61,6 @@ def run() -> int:
         response = client.post("/api/auth/register", json={"name": "Test User", "email": email, "password": "supersecret1"})
         check("register succeeds", response.status_code == 201, response.get_data(as_text=True))
         token = response.json["data"]["token"]
-        user_id = response.json["data"]["user"]["id"]
         check("password never returned", "password" not in response.json["data"]["user"])
         auth = {"Authorization": f"Bearer {token}"}
 
@@ -205,7 +206,159 @@ def run() -> int:
         response = client.get("/api/analytics/presentations", headers=auth)
         check("per-presentation analytics", len(response.json["data"]["presentations"]) == 1)
 
-        print("\n9. Profile")
+        print("\n9. Personalized gesture recognition")
+        response = client.get("/api/personalization/", headers=auth)
+        check("personalization defaults created", response.status_code == 200)
+        data = response.json["data"]
+        check("personalization is off until the user opts in",
+              data["settings"]["gesturePersonalizationEnabled"] is False)
+        check("gesture learning consent is off by default",
+              data["settings"]["gestureLearningConsent"] is False)
+        check("no personalized model yet", data["gesture"]["model"]["available"] is False)
+        check("class list derived from the pose library",
+              len(data["gesture"]["classes"]) == 11 and
+              data["gesture"]["classes"][-1]["isNull"] is True)
+
+        # Collection is refused until consent is given - Feature E.
+        response = client.post("/api/personalization/enrollment/camera/start", headers=auth, json={})
+        check("enrolment refused without consent",
+              response.status_code == 403 and response.json["error"]["code"] == "CONSENT_REQUIRED",
+              response.get_data(as_text=True))
+
+        response = client.put("/api/personalization/", headers=auth,
+                              json={"gestureLearningConsent": True})
+        check("consent can be given", response.json["data"]["settings"]["gestureLearningConsent"] is True)
+
+        response = client.get("/api/personalization/enrollment", headers=auth)
+        plan = response.json["data"]
+        check("enrolment plan lists every class", len(plan["steps"]) == 11)
+        check("enrolment plan starts empty", plan["totalRecordingsCollected"] == 0)
+        check("training blocked with no recordings", plan["readyToTrain"] is False)
+
+        response = client.post("/api/personalization/train", headers=auth, json={})
+        check("training with no data fails cleanly, not with a crash",
+              response.status_code in (200, 409, 422), response.get_data(as_text=True))
+
+        response = client.delete("/api/personalization/", headers=auth)
+        check("personalization data can be deleted", response.status_code == 200)
+
+        print("\n10. Voice assistant")
+        response = client.get("/api/voice/status", headers=auth)
+        check("voice status reachable", response.status_code == 200)
+        voice = response.json["data"]
+        check("voice is off until the user opts in", voice["enabled"] is False)
+        check("voice status explains what is missing", isinstance(voice["blockers"], list))
+
+        response = client.post("/api/voice/interpret", headers=auth, json={"text": "next slide"})
+        check("voice refused while disabled",
+              response.status_code == 403 and response.json["error"]["code"] == "VOICE_DISABLED")
+
+        client.put("/api/personalization/", headers=auth, json={"voiceEnabled": True})
+        response = client.get("/api/voice/commands", headers=auth)
+        check("voice command catalogue lists 15 intents",
+              len(response.json["data"]["intents"]) == 15, response.get_data(as_text=True))
+
+        response = client.post("/api/voice/interpret", headers=auth,
+                               json={"text": "go to slide 2", "execute": False})
+        if response.status_code == 200:
+            decision = response.json["data"]
+            check("voice classifies a real command", decision["command"] == "GO_TO_SLIDE")
+            check("voice extracts the slide number", decision["parameters"]["slideNumber"] == 2)
+            check("interpret with execute=false runs nothing", decision["executed"] is False)
+
+            response = client.post("/api/voice/interpret", headers=auth,
+                                   json={"text": "today we will discuss our results", "execute": True})
+            decision = response.json["data"]
+            check("ordinary speech is not a command", decision["intent"] == "NO_COMMAND")
+            check("ordinary speech executes nothing", decision["executed"] is False)
+
+            response = client.get("/api/voice/history", headers=auth)
+            check("voice telemetry recorded", len(response.json["data"]["commands"]) >= 2)
+            check("raw audio never stored",
+                  all("audio" not in entry for entry in response.json["data"]["commands"]))
+
+            response = client.delete("/api/voice/history", headers=auth)
+            check("voice history can be deleted", response.json["data"]["deleted"] >= 2)
+        else:
+            check("voice intent model missing is reported cleanly (not a crash)",
+                  response.status_code == 503 and
+                  response.json["error"]["code"] == "VOICE_UNAVAILABLE",
+                  response.get_data(as_text=True))
+
+        # A voice-only session needs no camera, so the full
+        #   voice -> intent -> CommandIntent -> dispatcher -> controller
+        # path can be exercised on a machine with no webcam. Whether the key press
+        # is actually delivered depends on PyAutoGUI reaching a desktop; the test
+        # asserts the command was dispatched and the session state moved, which is
+        # the part VisionX owns.
+        response = client.post("/api/sessions", headers=auth, json={"presentationId": presentation_id})
+        voice_session_id = response.json["data"]["session"]["id"]
+        response = client.post("/api/engine/start-voice", headers=auth,
+                               json={"sessionId": voice_session_id})
+        voice_session_started = response.status_code == 200
+        check("voice-only session starts without a camera", voice_session_started,
+              response.get_data(as_text=True))
+
+        if voice_session_started:
+            check("voice-only session reports no camera",
+                  response.json["data"]["engine"]["cameraActive"] is False)
+
+            response = client.post("/api/voice/interpret", headers=auth,
+                                   json={"text": "go to slide 2", "sessionId": voice_session_id})
+            decision = response.json["data"]
+            check("voice command dispatched through the existing dispatcher",
+                  decision["executed"] is True, response.get_data(as_text=True))
+            check("voice command resolved GO_TO_SLIDE 2",
+                  decision["command"] == "GO_TO_SLIDE" and decision["parameters"]["slideNumber"] == 2)
+            check("dispatcher moved to the requested slide",
+                  decision["result"]["currentSlide"] == 2, str(decision["result"]))
+            check("dispatch records the voice source", decision["result"]["source"] == "voice")
+
+            response = client.post("/api/voice/interpret", headers=auth,
+                                   json={"text": "next slide", "sessionId": voice_session_id})
+            check("voice NEXT_SLIDE advances from the current slide",
+                  response.json["data"]["result"]["currentSlide"] == 3,
+                  response.get_data(as_text=True))
+
+            # A slide beyond the deck must be refused, not clamped.
+            response = client.post("/api/voice/interpret", headers=auth,
+                                   json={"text": "go to slide 99", "sessionId": voice_session_id})
+            decision = response.json["data"]
+            check("out-of-range slide refused, not clamped",
+                  decision["executed"] is False and decision["reason"] == "invalid_parameters")
+
+            # Ordinary speech during a live session must change nothing.
+            response = client.post("/api/voice/interpret", headers=auth,
+                                   json={"text": "as you can see on this slide revenue grew",
+                                         "sessionId": voice_session_id})
+            check("ordinary speech mid-session changes nothing",
+                  response.json["data"]["executed"] is False)
+            status = client.get("/api/engine/status", headers=auth).json["data"]
+            check("slide unchanged after ordinary speech", status["currentSlide"] == 3,
+                  str(status.get("currentSlide")))
+
+            # The control bar and voice share one dispatcher and one set of counters.
+            response = client.post("/api/engine/command", headers=auth,
+                                   json={"command": "GO_TO_SLIDE", "parameters": {"slideNumber": 2}})
+            check("manual command accepts parameters too",
+                  response.status_code == 200 and
+                  response.json["data"]["result"]["currentSlide"] == 2,
+                  response.get_data(as_text=True))
+
+            response = client.post(f"/api/sessions/{voice_session_id}/complete", headers=auth, json={})
+            summary = response.json["data"]["summary"]
+            check("voice commands counted in the session summary",
+                  summary["commandsFired"] >= 3, str(summary))
+            check("voice commands appear in the gesture breakdown",
+                  "GO_TO_SLIDE" in summary["gestureCounts"], str(summary["gestureCounts"]))
+
+        response = client.get("/api/engine/commands", headers=auth)
+        commands = response.json["data"]["commands"]
+        check("command catalogue exposes 12 commands", len(commands) == 12)
+        check("exactly five commands are pose-bindable",
+              sum(1 for row in commands if row["bindable"]) == 5)
+
+        print("\n11. Profile")
         response = client.put("/api/users/me", headers=auth, json={"name": "Renamed User"})
         check("profile updated", response.json["data"]["user"]["name"] == "Renamed User")
 
@@ -219,7 +372,7 @@ def run() -> int:
         response = client.post("/api/auth/login", json={"email": email, "password": "anotherpassword1"})
         check("login with the new password", response.status_code == 200)
 
-        print("\n10. Cleanup path")
+        print("\n12. Cleanup path")
         response = client.delete(f"/api/presentations/{presentation_id}", headers=auth)
         check("presentation deleted", response.status_code == 200)
         response = client.get("/api/presentations", headers=auth)
@@ -234,6 +387,9 @@ def run() -> int:
                 gesture_preferences().delete_many({"userId": uid})
                 presentation_history().delete_many({"userId": uid})
                 annotations().delete_many({"userId": uid})
+                personalization().delete_many({"userId": uid})
+                gesture_recordings().delete_many({"userId": uid})
+                voice_commands().delete_many({"userId": uid})
                 users().delete_one({"_id": ObjectId(uid)})
 
     print(f"\n{'=' * 60}")
@@ -247,3 +403,23 @@ def run() -> int:
 
 if __name__ == "__main__":
     sys.exit(run())
+
+
+def test_api_flow():
+    """Pytest entry point, so this file is collected by `pytest` and not only
+    runnable as a script. Skips rather than fails when MongoDB is unreachable -
+    every other test in the suite is deliberately database-free.
+    """
+    import pytest
+
+    from config import database
+
+    try:
+        database.connect()
+        connected = database.is_connected()
+    except Exception as exc:  # noqa: BLE001
+        pytest.skip(f"MongoDB is not reachable ({exc}); this end-to-end flow requires it.")
+    if not connected:
+        pytest.skip("MongoDB is not reachable; this end-to-end flow requires it.")
+
+    assert run() == 0, f"API flow checks failed: {FAILED}"

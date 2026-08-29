@@ -5,7 +5,7 @@ import logging
 from bson import ObjectId
 
 from config.database import presentations
-from services import gesture_service, session_service
+from services import gesture_service, personalization_service, session_service
 from services.engine_service import engine_service
 from utils.errors import NotFoundError
 from utils.serializers import serialize
@@ -26,7 +26,43 @@ def start_engine(user_id: str, session_id: str, options: dict | None = None) -> 
             raise NotFoundError("The presentation for this session no longer exists.")
 
     preferences = gesture_service.preferences_for_engine(user_id)
-    status = engine_service.start(user_id, session, presentation, preferences, options or {})
+
+    # Personalized recognition is opt-in and only takes effect when the user
+    # actually has a model; otherwise the engine builds the geometric recognizer.
+    options = dict(options or {})
+    options.setdefault(
+        "personalizationEnabled", personalization_service.personalization_enabled(user_id)
+    )
+    options.setdefault("intentMargin", personalization_service.intent_margin(user_id))
+
+    status = engine_service.start(user_id, session, presentation, preferences, options)
+    session_service.mark_active(user_id, session_id)
+
+    return {
+        "engine": status,
+        "session": serialize(session_service.get_owned(user_id, session_id)),
+        "presentation": serialize(presentation, drop=("filePath",)) if presentation else None,
+    }
+
+
+def start_voice_session(user_id: str, session_id: str, options: dict | None = None) -> dict:
+    """Bind a session for voice control without opening the camera.
+
+    Same session record, same dispatcher, same history - only the camera is
+    absent. This is what keeps voice working when the webcam does not.
+    """
+    session = session_service.get_owned(user_id, session_id)
+
+    presentation = None
+    if session.get("presentationId"):
+        presentation = presentations().find_one({
+            "_id": ObjectId(session["presentationId"]),
+            "userId": ObjectId(user_id),
+        })
+        if not presentation:
+            raise NotFoundError("The presentation for this session no longer exists.")
+
+    status = engine_service.start_voice_only(user_id, session, presentation, options or {})
     session_service.mark_active(user_id, session_id)
 
     return {

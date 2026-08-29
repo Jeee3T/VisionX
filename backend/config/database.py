@@ -9,10 +9,13 @@ from config.settings import settings
 from models.schema import (
     ANNOTATIONS,
     GESTURE_PREFERENCES,
+    GESTURE_RECORDINGS,
+    PERSONALIZATION,
     PRESENTATION_HISTORY,
     PRESENTATIONS,
     SCHEMA,
     USERS,
+    VOICE_COMMANDS,
 )
 
 logger = logging.getLogger(__name__)
@@ -81,3 +84,15 @@ def presentation_history():
 
 def annotations():
     return get_db()[ANNOTATIONS]
+
+
+def personalization():
+    return get_db()[PERSONALIZATION]
+
+
+def gesture_recordings():
+    return get_db()[GESTURE_RECORDINGS]
+
+
+def voice_commands():
+    return get_db()[VOICE_COMMANDS]

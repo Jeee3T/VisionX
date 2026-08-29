@@ -17,6 +17,20 @@ backend/uploads/*
 # MediaPipe model (downloaded by scripts/download_model.py)
 computer_vision/models/*.task
 
+# Per-user personalized gesture models - trained locally, never committed
+computer_vision/models/users/
+
+# Trained voice intent model - rebuild with
+#   python -m voice_assistant.training.train_intent_model
+voice_assistant/models/
+
+# Collected gesture landmark recordings. Per-user biometric-adjacent data:
+# never committed. The hand-authored voice dataset IS committed (it is text).
+data/gesture/
+
+# Training reports
+reports/
+
 # Node / frontend
 node_modules/
 frontend/dist/

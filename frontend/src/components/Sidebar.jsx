@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
+  AudioLines,
   BarChart3,
   Hand,
   History,
@@ -15,6 +16,7 @@ const LINKS = [
   { to: '/presentations', label: 'Library', icon: Library },
   { to: '/upload', label: 'Upload', icon: Upload },
   { to: '/gestures', label: 'Gestures', icon: Hand },
+  { to: '/voice', label: 'Voice', icon: AudioLines },
   { to: '/history', label: 'History', icon: History },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/profile', label: 'Profile', icon: UserRound },

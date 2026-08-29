@@ -17,14 +17,17 @@ from datetime import datetime, timezone
 from bson import ObjectId
 
 from computer_vision.command_mapping.gesture_mapper import (
+    ALL_COMMANDS,
     ANNOTATION_MODE,
     CLEAR_ANNOTATION,
-    COMMANDS,
 )
 from computer_vision.engine import EngineConfig, GestureEngine, MODE_ANNOTATE
 from config.database import annotations as annotations_collection
 from config.database import presentation_history
 from config.settings import settings
+from multimodal.command import CommandIntent, CommandParameterError, SOURCE_GESTURE, SOURCE_MANUAL
+from multimodal.command import build as build_intent
+from multimodal.context import context as multimodal_context
 from presentation_controller.annotation import AnnotationController
 from presentation_controller.dispatcher import CommandDispatcher
 from presentation_controller.powerpoint import PowerPointController
@@ -43,6 +46,37 @@ class EngineService:
         self._saved_strokes = 0
         self._annotations_made = 0
         self._last_pointer_persist = 0.0
+        # Commands issued when the camera is not running (voice-only sessions).
+        self._offline_commands = 0
+        self._offline_counts: dict[str, int] = {}
+
+    # --- session binding -----------------------------------------------------
+    def _bind_session(self, user_id: str, session_doc: dict, presentation: dict | None,
+                      options: dict) -> None:
+        """Create the dispatcher and session record. No camera is touched here.
+
+        Split out of `start()` so a voice-only session can exist without a camera:
+        if the webcam is unavailable the presenter can still drive PowerPoint by
+        voice, and both paths dispatch through the same CommandDispatcher.
+        """
+        controller = PowerPointController()
+        self.dispatcher = CommandDispatcher(controller, AnnotationController())
+        self.dispatcher.bind_presentation(
+            current_slide=int(options.get("startSlide") or 1),
+            total_slides=int((presentation or {}).get("totalSlides") or 0),
+        )
+        self._saved_strokes = 0
+        self._annotations_made = 0
+        self._offline_commands = 0
+        self._offline_counts = {}
+        self.session = {
+            "sessionId": str(session_doc["_id"]),
+            "userId": user_id,
+            "presentationId": str(session_doc.get("presentationId") or ""),
+            "presentationTitle": (presentation or {}).get("title", ""),
+            "startedAt": time.time(),
+        }
+        multimodal_context.update_slide(self.dispatcher.current_slide)
 
     # --- lifecycle -----------------------------------------------------------
     def start(self, user_id: str, session_doc: dict, presentation: dict | None, preferences: dict,
@@ -54,12 +88,7 @@ class EngineService:
                     raise EngineError("The camera is already in use by another VisionX session.")
                 raise EngineError("A gesture session is already running. End it before starting a new one.")
 
-            controller = PowerPointController()
-            self.dispatcher = CommandDispatcher(controller, AnnotationController())
-            self.dispatcher.bind_presentation(
-                current_slide=int(options.get("startSlide") or 1),
-                total_slides=int((presentation or {}).get("totalSlides") or 0),
-            )
+            self._bind_session(user_id, session_doc, presentation, options)
 
             config = EngineConfig(
                 camera_index=int(options.get("cameraIndex", settings.CV_CAMERA_INDEX)),
@@ -72,6 +101,9 @@ class EngineService:
                 cooldown_ms=int(options.get("cooldownMs", settings.CV_COOLDOWN_MS)),
                 mirror=bool(options.get("mirror", True)),
                 preferences=preferences,
+                user_id=user_id,
+                personalization_enabled=bool(options.get("personalizationEnabled", False)),
+                intent_margin=float(options.get("intentMargin", settings.GESTURE_INTENT_MARGIN)),
             )
 
             self.engine = GestureEngine(
@@ -80,15 +112,6 @@ class EngineService:
                 on_event=bus.publish,
                 on_pointer=self._on_pointer,
             )
-            self._saved_strokes = 0
-            self._annotations_made = 0
-            self.session = {
-                "sessionId": str(session_doc["_id"]),
-                "userId": user_id,
-                "presentationId": str(session_doc.get("presentationId") or ""),
-                "presentationTitle": (presentation or {}).get("title", ""),
-                "startedAt": time.time(),
-            }
             self.engine.start()
 
             # Give the camera a moment so the client gets a truthful first status.
@@ -103,20 +126,43 @@ class EngineService:
 
             return self.status()
 
+    def start_voice_only(self, user_id: str, session_doc: dict, presentation: dict | None,
+                         options: dict | None = None) -> dict:
+        """Bind a session for voice control without opening the camera.
+
+        Used when the presenter turns on voice but not gestures, and as the
+        fallback when the camera is unavailable - losing the webcam must not
+        also lose voice control.
+        """
+        options = options or {}
+        with self._lock:
+            if self.engine and self.engine.is_running:
+                raise EngineError("A session is already running. End it before starting a new one.")
+            if self.dispatcher and self.session and self.session.get("userId") != user_id:
+                raise EngineError("A session belongs to another user.")
+            self._bind_session(user_id, session_doc, presentation, options)
+            bus.publish({"type": "state", **self.status()})
+            return self.status()
+
     def stop(self, user_id: str | None = None) -> dict:
         with self._lock:
-            if not self.engine:
+            if not self.engine and not self.dispatcher:
                 raise EngineError("No gesture session is running.")
             if user_id and self.session and self.session.get("userId") != user_id:
                 raise EngineError("This session belongs to another user.")
 
-            self.engine.stop()
+            if self.engine:
+                self.engine.stop()
             self._flush_annotations()
+            counts = dict(self._offline_counts)
+            if self.engine:
+                for command, count in self.engine.gesture_counts.items():
+                    counts[command] = counts.get(command, 0) + count
             summary = {
                 "slidesNavigated": self.dispatcher.slides_navigated if self.dispatcher else 0,
                 "annotationsMade": self._annotations_made,
-                "commandsFired": self.engine.commands_fired,
-                "gestureCounts": dict(self.engine.gesture_counts),
+                "commandsFired": (self.engine.commands_fired if self.engine else 0) + self._offline_commands,
+                "gestureCounts": counts,
                 "currentSlide": self.dispatcher.current_slide if self.dispatcher else 1,
             }
             self._teardown()
@@ -128,6 +174,9 @@ class EngineService:
         self.dispatcher = None
         self.session = None
         self._saved_strokes = 0
+        self._offline_commands = 0
+        self._offline_counts = {}
+        multimodal_context.reset()
 
     # --- queries -------------------------------------------------------------
     @property
@@ -136,10 +185,21 @@ class EngineService:
 
     def status(self) -> dict:
         with self._lock:
-            if not self.engine:
-                return {"running": False, "state": "STOPPED", "mode": "IDLE", "session": None}
-            payload = {"running": self.engine.is_running, "session": self.session}
-            payload.update(self.engine.snapshot())
+            if not self.engine and not self.dispatcher:
+                return {"running": False, "state": "STOPPED", "mode": "IDLE", "session": None,
+                        "cameraActive": False, "voiceOnly": False}
+            payload: dict = {
+                "running": bool(self.engine and self.engine.is_running),
+                "cameraActive": bool(self.engine and self.engine.is_running),
+                "voiceOnly": self.engine is None,
+                "session": self.session,
+            }
+            if self.engine:
+                payload.update(self.engine.snapshot())
+            else:
+                payload.update({"state": "VOICE_ONLY", "mode": "IDLE", "error": None,
+                                "fps": 0.0, "commandsFired": self._offline_commands,
+                                "gestureCounts": dict(self._offline_counts)})
             if self.dispatcher:
                 payload.update(self.dispatcher.state())
             payload["annotationsMade"] = self._annotations_made
@@ -164,26 +224,52 @@ class EngineService:
         with self._lock:
             self._require_owner(user_id)
             self.dispatcher.current_slide = max(1, int(slide))
+            multimodal_context.update_slide(self.dispatcher.current_slide)
             bus.publish({"type": "slide", "currentSlide": self.dispatcher.current_slide})
             return self.dispatcher.state()
 
-    def execute_command(self, user_id: str, command: str) -> dict:
-        """Manual command trigger (keyboard/UI fallback) - same dispatch path as a gesture."""
+    def execute_command(self, user_id: str, command: str, parameters: dict | None = None,
+                        source: str = SOURCE_MANUAL) -> dict:
+        """Manual command trigger (control bar / keyboard) - one shared dispatch path."""
         with self._lock:
             self._require_owner(user_id)
-            if command not in COMMANDS:
+            if command not in ALL_COMMANDS:
                 raise EngineError(f"Unknown command '{command}'.")
-            record = self.dispatcher.execute(command)
-            # Manual commands travel the same dispatch path as gestures and count
-            # toward the session totals, so history and analytics stay complete.
+            try:
+                intent = build_intent(
+                    command, source, parameters,
+                    total_slides=self.dispatcher.total_slides if self.dispatcher else 0,
+                )
+            except CommandParameterError as exc:
+                raise EngineError(str(exc), code="VALIDATION_ERROR") from exc
+            return self.execute_intent(user_id, intent)
+
+    def execute_intent(self, user_id: str, intent: CommandIntent) -> dict:
+        """Run a CommandIntent from any modality. Gesture, voice, manual and the
+        keyboard fallback all end up here, so there is exactly one place where a
+        VisionX command becomes a PowerPoint key press."""
+        with self._lock:
+            self._require_owner(user_id)
+            record = self.dispatcher.execute_intent(intent)
+            self._count_command(intent.intent)
+            self._after_command(intent.intent, record, source=intent.source)
+            # The HTTP response carries the same shape as the SSE `command` event -
+            # record plus dispatcher state - so a caller that cannot listen on the
+            # stream still learns where the deck ended up.
+            return {**record, **self.dispatcher.state(), "intent": intent.as_dict()}
+
+    def _count_command(self, command: str) -> None:
+        """Every modality counts toward the session totals, so history stays complete."""
+        if self.engine:
             self.engine.commands_fired += 1
             self.engine.gesture_counts[command] = self.engine.gesture_counts.get(command, 0) + 1
-            self._after_command(command, record, source="manual")
-            return record
+        else:
+            self._offline_commands += 1
+            self._offline_counts[command] = self._offline_counts.get(command, 0) + 1
 
     def _require_owner(self, user_id: str) -> None:
-        if not self.engine or not self.dispatcher:
-            raise EngineError("No gesture session is running.")
+        if not self.dispatcher:
+            raise EngineError("No session is running. Start a session first.")
         if not self.owns_session(user_id):
             raise EngineError("This session belongs to another user.")
 
@@ -191,14 +277,17 @@ class EngineService:
     def _on_command(self, command: str, payload: dict) -> None:
         if not self.dispatcher:
             return
-        record = self.dispatcher.execute(command, payload)
-        self._after_command(command, record, source="gesture")
+        record = self.dispatcher.execute(command, {**payload, "source": SOURCE_GESTURE})
+        self._after_command(command, record, source=SOURCE_GESTURE)
 
     def _after_command(self, command: str, record: dict, source: str) -> None:
         if command == CLEAR_ANNOTATION:
             self._clear_persisted_annotations(record["slide"])
         elif command == ANNOTATION_MODE and not record["annotationActive"]:
             self._flush_annotations()
+
+        if self.dispatcher:
+            multimodal_context.update_slide(self.dispatcher.current_slide)
 
         bus.publish({
             "type": "command",

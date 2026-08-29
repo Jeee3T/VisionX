@@ -18,6 +18,10 @@ class PowerPointController(PresentationController):
       ctrl+p         pen (annotation) on
       ctrl+a         back to the arrow pointer
       e              erase all ink on the current slide
+      <n> enter      jump to slide n
+      home / end     first & last slide
+      f5 / esc       start & end the slideshow
+      b / w          black & white screen
     """
 
     name = "powerpoint"
@@ -34,6 +38,34 @@ class PowerPointController(PresentationController):
 
     def previous_slide(self) -> None:
         self.keyboard.press("left")
+
+    def goto_slide(self, number: int) -> None:
+        """PowerPoint jumps to a slide when its number is typed then Enter."""
+        target = int(number)
+        if target < 1:
+            raise PresentationControlError("Slide numbers start at 1.")
+        self.keyboard.write(str(target))
+        self.keyboard.press("enter")
+
+    def first_slide(self) -> None:
+        self.keyboard.press("home")
+
+    def last_slide(self) -> None:
+        self.keyboard.press("end")
+
+    # --- slideshow ------------------------------------------------------------
+    def start_presentation(self) -> None:
+        self.keyboard.press("f5")
+
+    def end_presentation(self) -> None:
+        self.keyboard.press("esc")
+
+    def blackout(self) -> None:
+        """`B` toggles a black screen - the same key blanks and restores."""
+        self.keyboard.press("b")
+
+    def whiteout(self) -> None:
+        self.keyboard.press("w")
 
     # --- pointer -------------------------------------------------------------
     def set_pointer(self, active: bool) -> None:
@@ -63,9 +95,15 @@ class PowerPointController(PresentationController):
         self._annotation_active = False
 
     # --- introspection -------------------------------------------------------
+    def capabilities(self) -> set[str]:
+        from computer_vision.command_mapping.gesture_mapper import ALL_COMMANDS
+
+        return set(ALL_COMMANDS)
+
     def describe(self) -> dict:
         return {
             "controller": self.name,
+            "capabilities": sorted(self.capabilities()),
             "available": self.keyboard.available,
             "pointerActive": self._pointer_active,
             "annotationActive": self._annotation_active,

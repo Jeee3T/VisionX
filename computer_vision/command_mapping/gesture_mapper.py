@@ -8,7 +8,28 @@ VIRTUAL_POINTER = "VIRTUAL_POINTER"
 ANNOTATION_MODE = "ANNOTATION_MODE"
 CLEAR_ANNOTATION = "CLEAR_ANNOTATION"
 
+# Commands a hand pose can be bound to. Unchanged: five poses, five commands,
+# which is what the gesture settings screen and GesturePreferences describe.
 COMMANDS = (NEXT_SLIDE, PREVIOUS_SLIDE, VIRTUAL_POINTER, ANNOTATION_MODE, CLEAR_ANNOTATION)
+
+# Commands that exist but are not bound to a pose: they need a parameter, or they
+# are awkward to hold a hand still for. Voice, the control bar and the keyboard
+# fallback can all issue them, and every one is a real PowerPoint shortcut that
+# PowerPointController actually implements - nothing here is aspirational.
+GO_TO_SLIDE = "GO_TO_SLIDE"
+FIRST_SLIDE = "FIRST_SLIDE"
+LAST_SLIDE = "LAST_SLIDE"
+START_PRESENTATION = "START_PRESENTATION"
+END_PRESENTATION = "END_PRESENTATION"
+BLACKOUT = "BLACKOUT"
+WHITEOUT = "WHITEOUT"
+
+UNBOUND_COMMANDS = (
+    GO_TO_SLIDE, FIRST_SLIDE, LAST_SLIDE,
+    START_PRESENTATION, END_PRESENTATION, BLACKOUT, WHITEOUT,
+)
+
+ALL_COMMANDS = COMMANDS + UNBOUND_COMMANDS
 
 # GesturePreferences field name -> command
 PREFERENCE_FIELDS = {
@@ -25,7 +46,38 @@ COMMAND_LABELS = {
     VIRTUAL_POINTER: "Virtual pointer",
     ANNOTATION_MODE: "Annotation mode",
     CLEAR_ANNOTATION: "Clear annotation",
+    GO_TO_SLIDE: "Go to slide",
+    FIRST_SLIDE: "First slide",
+    LAST_SLIDE: "Last slide",
+    START_PRESENTATION: "Start slideshow",
+    END_PRESENTATION: "End slideshow",
+    BLACKOUT: "Black screen",
+    WHITEOUT: "White screen",
 }
+
+# Parameters each command accepts. The voice layer and the dispatcher agree on
+# this table, so a parameter can never be produced that dispatch cannot consume.
+COMMAND_PARAMETERS = {
+    NEXT_SLIDE: ("count",),
+    PREVIOUS_SLIDE: ("count",),
+    GO_TO_SLIDE: ("slideNumber",),
+    VIRTUAL_POINTER: ("state",),
+    ANNOTATION_MODE: ("state",),
+}
+
+
+def command_catalogue() -> list[dict]:
+    """Serialisable command list for the settings and voice screens."""
+    return [
+        {
+            "command": command,
+            "label": COMMAND_LABELS[command],
+            "bindable": command in COMMANDS,
+            "parameters": list(COMMAND_PARAMETERS.get(command, ())),
+        }
+        for command in ALL_COMMANDS
+    ]
+
 
 DEFAULT_PREFERENCES = {
     "nextSlideGesture": "PINKY_UP",
