@@ -1,0 +1,1008 @@
+{"text": "next", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next slide please", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next one", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next page", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move on to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "advance to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "advance one slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "advance the slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "advance please", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you go to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you move to the next slide please", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's move on", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "on to the next one", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "onward", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "forward", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go forward", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go forward one slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move forward one slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "step forward", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "step forward one", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip ahead", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "flip to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the page", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next up", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "keep going", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "continue to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "so next slide please", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "right next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "slide forward", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "one slide forward", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "forward one", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "forward please", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move forward two slides", "intent": "NEXT_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go forward three slides", "intent": "NEXT_SLIDE", "parameters": {"count": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip ahead two slides", "intent": "NEXT_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump forward four slides", "intent": "NEXT_SLIDE", "parameters": {"count": 4}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move ahead five slides", "intent": "NEXT_SLIDE", "parameters": {"count": 5}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "forward by two", "intent": "NEXT_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "advance two slides", "intent": "NEXT_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "advance by three", "intent": "NEXT_SLIDE", "parameters": {"count": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip the next two slides", "intent": "NEXT_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go on to the following slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next slide now", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "and next", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up the next slide", "intent": "NEXT_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "previous", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "previous slide please", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back a slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back a slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "one slide back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back one", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back please", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move to the previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "return to the previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me the previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you go back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you go back please", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go back one", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back up", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back up one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back up a slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "step back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "step back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go backwards", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "backwards one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "flip back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn back a page", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "previous page", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the slide before this one", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the one before", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the slide before", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay go back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright back one", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um go back a slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "sorry go back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "sorry can you go back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "oops go back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back two slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back two slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move back three slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back four slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 4}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back up two slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "step back three slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "rewind one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "rewind two slides", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back by two", "intent": "PREVIOUS_SLIDE", "parameters": {"count": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "previous one", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "last slide we were on", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me back one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring back the previous slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "return one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "reverse one slide", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go one back", "intent": "PREVIOUS_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide 7", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 7}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide seven", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 7}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide 3", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide three", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide 12", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 12}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide twelve", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 12}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide 20", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 20}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide twenty", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 20}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide number 5", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 5}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to slide number nine", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 9}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to slide 7", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 7}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to slide number seven", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 7}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to slide eleven", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 11}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show slide 4", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 4}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show slide four", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 4}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me slide 15", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 15}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me slide fifteen", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 15}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me slide number 6", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 6}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "display slide 8", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 8}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "display slide eighteen", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 18}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open slide 5", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 5}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open slide number ten", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 10}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up slide 9", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 9}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up slide nineteen", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 19}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pull up slide 14", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 14}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pull up slide two", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to slide 11", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 11}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to slide seventeen", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 17}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to number 9", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 9}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump ahead to slide 16", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 16}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip to slide 13", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 13}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip to slide six", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 6}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch to slide 10", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 10}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch to slide twenty one", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 21}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "navigate to slide 2", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 2}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move to slide 21", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 21}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move to slide thirty", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 30}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's look at slide 6", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 6}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go to slide twenty three", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 23}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you go to slide 18", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 18}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you show me slide 4", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 4}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you open slide number 12 please", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 12}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "please go to slide 25", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 25}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to slide 1", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 1}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to slide one", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 1}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "return to slide 3", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 3}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back to slide 8", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 8}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back to slide fourteen", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 14}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "slide 7 please", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 7}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "slide seven please", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 7}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "slide 22", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 22}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "slide thirty two", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 32}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay go to slide 5", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 5}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright slide number 10", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 10}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um take me to slide nine", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 9}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go straight to slide 16", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 16}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "head to slide 24", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 24}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the slide about revenue is slide 12 go there", "intent": "GO_TO_SLIDE", "parameters": {"slideNumber": 12}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go back to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start over", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start from the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "restart from the top", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the top", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to the top", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to the start", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "return to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "return to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the very first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the opening slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the title slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to the title slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the title slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "beginning please", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "first one", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the first one please", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you go to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you take me back to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go back to the start", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's start from the top", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay back to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um go to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "home", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go home", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "reset to the first slide", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "rewind to the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "all the way back", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "all the way to the start", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go all the way back", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take it from the top", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "from the top please", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "first page", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the first page", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "beginning of the deck", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start of the deck", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the start of the presentation", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "front of the deck", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "restart the deck from the beginning", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the beginning of the presentation please", "intent": "FIRST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the very end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the very last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the final slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the final slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the final slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "jump to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end of the deck", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end of the presentation", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the end of the deck", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "last one", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the last one please", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "final one", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you go to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you skip to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's jump to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright go to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um take me to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "straight to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go straight to the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "skip ahead to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fast forward to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "all the way forward", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "all the way to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go all the way to the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the closing slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the closing slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the summary slide at the end", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the last page", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the last page", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "final page please", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "display the last slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "move to the end of the presentation", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the end please", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "conclusion slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to the conclusion slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "wrap up slide", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take me to the final page", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me the end of the deck", "intent": "LAST_SLIDE", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the slide show", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start presenting", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the deck", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "begin the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "begin the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "begin presenting", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's begin", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's get started", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's start the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start now", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "run the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "run the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "play the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "play the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "launch the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "launch the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enter presentation mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enter slideshow mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go into presentation mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go full screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go fullscreen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fullscreen the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "present", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "present it", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the show", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put it in presentation mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put it into presentation mode now", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you start the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you start the slideshow please", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay start the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright let's start", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um start the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "kick off the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fire up the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the presentation now", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "begin the show", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "showtime", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the slides up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the deck on screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "throw it on screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "presentation mode please", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "slideshow mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start slide show mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start displaying the slides", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go live", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're ready to start", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "ready to present", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the talk", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "begin the talk", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open the deck", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open the slides", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open presentation mode", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open up the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open it up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open the slide show", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fire up the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fire up the deck", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fire up the slides", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fire it up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fire up the slide show", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the deck up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the presentation up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put it up on screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the slides up on screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the slides on screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the deck on the screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up the deck", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring the slides up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring it up on screen", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get the slideshow going", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get the presentation going", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get the deck going", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get the slides up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start it up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "boot up the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pull up the slideshow", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pull up the presentation", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pull up the deck", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "throw the slides up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "throw the deck up", "intent": "START_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end the slide show", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end presenting", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop presenting", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit slideshow mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "quit the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "quit presenting", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "escape the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get out of the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get out of presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "come out of full screen", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit full screen", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit fullscreen", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave full screen", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "finish the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're done presenting", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that's the end", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that's it we're done", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're finished", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "wrap it up", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you end the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you stop the slideshow please", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay end the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright stop the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um exit the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "shut down the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the slideshow", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the show", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end the show", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close the deck", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the slides away", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take the slides down", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take it off screen", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to normal view", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back to the editor", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "return to normal view", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the deck", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end presentation mode now", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "done presenting", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "presentation over", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that concludes the presentation", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's stop here", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit presentation mode now", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave presentation mode now", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get out of presentation mode now", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "drop out of presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "come out of presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "out of presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "kill presentation mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit slide show mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave slideshow mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off slideshow mode", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "end the slide show now", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the slide show now", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close it down", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "shut it down", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take it down", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take the deck down", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the presentation away", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the deck away", "intent": "END_PRESENTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blackout", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black out the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black out", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make the screen black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the screen black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank it out", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank it", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the slides", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the deck", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the display", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen off", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "kill the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "cut the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "cut to black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "fade to black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black the screen out", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "darken the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make it dark", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make the display black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the screen to black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you black out the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you blank the screen please", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay black screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright blank the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um black out the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen black please", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blackout please", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black please", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go black for a second", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black it out for a moment", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the slide for now", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take the slide off the screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "nothing on screen please", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the screen to black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank the projector", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black out the projector", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen to black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "temporarily hide the slides", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pause the slides on black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "black screen for questions", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go dark", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn it dark", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide what's on screen", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make the projector black", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen dark please", "intent": "BLACKOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "whiteout", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white out the screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white out", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make the screen white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the screen white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make it white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make the display white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white the screen out", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "whiteout please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white screen please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "brighten the screen to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the screen to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank the screen to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you white out the screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you make the screen white please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright white out the screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um make the screen white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show a white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me a white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch to a white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white background please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the screen to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white it out", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white out the projector", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make the projector white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the display white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white screen for the whiteboard", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white screen so i can write", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's go white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "flip to white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white for a moment", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white the screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "screen goes white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put up a white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank white please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "whiteboard mode", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white it out for a second", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "make everything white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "all white please", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "display white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "white out the display", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn everything white", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "empty white screen", "intent": "WHITEOUT", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the pointer on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pointer on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "activate the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pointer please", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the laser", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the laser on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "laser on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "laser pointer on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable the laser pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show the laser pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me the laser pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "activate the laser pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch on the laser pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i need the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me point at something", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me point at this", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you turn on the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you enable the laser pointer please", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay pointer on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright turn on the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um enable the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "virtual pointer on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the virtual pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable the virtual pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the laser", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bring up the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pointer mode", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go into pointer mode", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch to pointer mode", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enter pointer mode", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pointing mode on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "use the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'd like to use the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the red dot on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "red dot on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "show me the laser", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "laser mode on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "point mode", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me a pointer please", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable pointing", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn pointing on", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "activate pointing mode", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the pointer on the screen", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to highlight with the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to use the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want the laser pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i would like the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me use the pointer", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to point at something", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to point this out", "intent": "ENABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the pointer off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pointer off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "deactivate the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get rid of the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "remove the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the laser", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the laser off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "laser off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "laser pointer off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable the laser pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the laser pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the laser pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the laser away", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the pointer away", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'm done with the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i don't need the pointer any more", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're done pointing", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop pointing", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "no more pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you turn off the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you disable the laser pointer please", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay pointer off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright turn off the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um disable the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "virtual pointer off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the virtual pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable the virtual pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit pointer mode", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave pointer mode", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "out of pointer mode", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop pointer mode", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pointer mode off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the red dot off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "red dot off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hide the red dot", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "kill the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch off the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch off the laser", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "cancel the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "drop the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "no pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn pointing off", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable pointing", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop using the pointer", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take the pointer off the screen", "intent": "DISABLE_POINTER", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the pen on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pen on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "activate the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pen please", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me draw", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me write", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to draw on this slide", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to write on the slide", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i need to annotate this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on annotation", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on annotations", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable annotation", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable annotation mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "annotation on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "annotation mode on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start annotating", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me annotate", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's annotate this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the marker", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "marker on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me the marker", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the highlighter", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "highlighter on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable the highlighter", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you turn on the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you enable annotation mode please", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay pen on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright turn on the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um enable the pen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "drawing mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "drawing mode on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go into drawing mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enter drawing mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch to drawing mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enter annotation mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "go into annotation mode", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "ink on", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on ink", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "enable ink", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me circle something", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to circle this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me underline this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me mark this up", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'd like to write on the screen", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me something to draw with", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "activate drawing", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn on the drawing tool", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pen tool please", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to circle something", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me circle this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to draw on this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to draw this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i need to draw on the slide", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to annotate this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me annotate this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me draw on this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to underline this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me write on this", "intent": "ENABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn the pen off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "pen off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the pen away", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "deactivate the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'm done drawing", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'm done writing", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'm finished annotating", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're done annotating", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop drawing", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop writing", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "no more drawing", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off annotation", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off annotations", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable annotation", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable annotation mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "annotation off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "annotation mode off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop annotating", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit annotation mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave annotation mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "out of annotation mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the marker", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "marker off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "put the marker away", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the highlighter", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "highlighter off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable the highlighter", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you turn off the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you disable annotation mode please", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay pen off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright turn off the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um disable the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "drawing mode off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "exit drawing mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "leave drawing mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop drawing mode", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "ink off", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off ink", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "disable ink", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch off the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "switch the pen off please", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "cancel the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "drop the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "no pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "close the pen tool", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "turn off the drawing tool", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "stop using the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "done with the pen", "intent": "DISABLE_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the ink", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the drawing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the drawings", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the screen", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear it", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear all of that", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear that", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear this slide", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the ink", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the drawing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase everything", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase it", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase that", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase this slide", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase what i drew", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase my drawing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the marks", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "rub that out", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "wipe the ink", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "wipe that off", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "wipe the slide clean", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "remove the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "remove the ink", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "remove the drawings", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get rid of the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get rid of the ink", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "get rid of what i drew", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "delete the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "delete the ink", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "undo all the drawing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clean up the slide", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clean the slide", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "tidy up the slide", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you clear the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "could you erase the ink please", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay clear the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright erase that", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um clear the drawing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the markup", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the highlights", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "remove the highlights", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the circle", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the circles", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "clear the writing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "erase the writing", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "reset the slide", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "reset the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "start the slide fresh", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "blank out the annotations", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "take the ink off", "intent": "CLEAR_ANNOTATION", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "today we are going to discuss the market", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "good morning everyone and thank you for coming", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "my name is alex and i lead the platform team", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me introduce myself briefly", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to start by thanking the organisers", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "this presentation covers three main areas", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "as you can see on this slide revenue grew by twelve percent", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "this slide shows our quarterly performance", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the slide behind me summarises the architecture", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i put a lot of detail on this slide so take your time", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "there's a lot going on in this slide", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the previous slide showed the baseline", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "on the next slide you can see the breakdown", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "in the next section we'll look at costs", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the next quarter looks strong for us", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next year we expect this to double", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "our next hire will be a data engineer", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "what comes next is the interesting part", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me point out three things here", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to point out the outlier in the corner", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the key point is that latency dropped", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that's an excellent point thank you", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "at this point we had about forty customers", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "to be clear this is a projection not a guarantee", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me be clear about the assumptions", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "it's clear that the trend is upward", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to make one thing clear", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the numbers are black and white here", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the black line is last year the blue line is this year", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the white bars represent the control group", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we started this project back in march", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "when we started the error rate was much higher", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "going back to the earlier question", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back in 2023 we had a very different stack", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll come back to that in a moment", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's take a step back and look at the bigger picture", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we ended the year ahead of plan", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "by the end of the quarter we had shipped it", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "in the end the simplest option won", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "at the end of the day it's about the user", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the first thing to notice is the spike", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "first we collected the data then we cleaned it", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the last thing i want to cover is pricing", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the last time we measured this it was much slower", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "last week we ran the experiment again", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "seven of our ten largest customers renewed", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we surveyed twenty three teams for this", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "about fifteen percent of requests hit the cache", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "it took us three months to build", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we cut the cost by half", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "there were four main obstacles", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the number twelve here is the median not the mean", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "page five of the handout has the full table", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i've written the details in the appendix", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "feel free to write down any questions", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll draw your attention to the middle column", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that draws a nice parallel with the earlier example", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we drew a lot of lessons from that outage", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "this is a rough sketch of the design", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me show you what i mean", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll show the numbers in a second", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "this shows a clear correlation", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "what this shows is that the approach scales", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "moving on to the technical details", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "moving forward we'll invest more here", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's move on to questions", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'm going to move quite quickly through this part", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're making good progress on that", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "so how does this actually work", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "why does this matter to you", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "what does this mean in practice", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the answer is more nuanced than that", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "does anyone have any questions so far", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "are there any questions before i continue", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll take questions at the end", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that's a great question let me answer it", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "sorry could you repeat the question", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i didn't quite catch that", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can everyone hear me at the back", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "is the microphone working", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "can you see the screen okay", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the projector is a bit dim today", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "sorry about the technical difficulties", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "give me one second here", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "bear with me for a moment", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "um let me think about that for a second", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "so yeah that's basically the idea", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "okay so where were we", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "right so that's the background", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "alright so let's dig into the detail", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "and that brings me to the second part", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "which leads nicely into the next topic", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "as i mentioned earlier the system is distributed", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "as i said at the beginning this is early work", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "to summarise we found three things", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "in summary the approach works", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "in conclusion we recommend option two", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "to wrap up i want to leave you with one idea", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "thank you all very much for your time", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "thanks for listening", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll leave my contact details up", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "please reach out if you want to talk more", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the code is open source and linked here", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "you can find the paper on our website", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we published the dataset last month", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the repository has a full readme", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "our team is about fifteen people", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we work closely with the platform group", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the engineering effort was roughly six months", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we hired two more engineers in the spring", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the budget was approved in january", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "compliance signed off on this in february", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the rollout happened over three weeks", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we saw no regressions in production", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "latency stayed under a hundred milliseconds", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "throughput doubled after the change", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the cache hit rate is around ninety percent", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "memory usage went down significantly", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we run this on commodity hardware", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "it's written in python and rust", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the model is trained nightly", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we retrain when accuracy drops", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the pipeline is fully automated now", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "monitoring alerts us within a minute", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we had one incident in the last quarter", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the postmortem is linked at the bottom", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "customers noticed the improvement immediately", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "support tickets dropped by a third", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "satisfaction scores went up four points", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "churn is at an all time low", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the sales team loves this feature", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "marketing wants to announce it next month", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're targeting general availability in q3", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the beta starts in a couple of weeks", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "early feedback has been positive", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "there are still some rough edges", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we know the ui needs work", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "performance on mobile is not there yet", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're aware of the accessibility gaps", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "that's on the roadmap for later this year", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "it's a trade off between speed and accuracy", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we chose reliability over raw throughput", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the simplest solution turned out to be the best", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we tried three approaches before this one", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the first two attempts failed badly", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we learned a lot from those failures", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i think that covers everything", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me just double check something", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hold on a moment please", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "one moment while i find the reference", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "where did i put that number", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i had a note about this somewhere", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "anyway the conclusion is the same", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "so that's the story in a nutshell", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "hopefully that made sense", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "does that answer your question", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i hope that was useful", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "feel free to interrupt me at any time", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll speak for about twenty minutes", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we have thirty minutes including questions", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll try to leave time at the end", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let's keep an eye on the clock", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we're running a little behind", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll speed up a bit", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'm going to skip some of the detail", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i won't read the slide to you", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the details are in the notes", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i'll share these slides afterwards", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the deck will be circulated by email", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "you'll get a copy of the presentation", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "it's fine to take photos of the slides", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "recording is allowed for this session", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "please mute yourselves if you're remote", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "for those joining online welcome", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the room is a bit warm sorry about that", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "help yourselves to coffee at the back", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we'll break for lunch after this", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the next session starts at two", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the agenda is on the wall outside", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the next meeting is at three", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the next quarter looks strong", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "our next steps are outlined here", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the next phase begins in June", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "next year we expect growth", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the first quarter was difficult", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the first thing to notice is the trend", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "our first customer signed in May", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the first version shipped late", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "first of all thank you all for coming", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the last quarter was our best", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the last thing i want to mention is cost", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we start manufacturing in April", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "we started this project last year", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the presentation was well received", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "this presentation took months to prepare", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to talk about revenue", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to highlight three findings", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "i want to circle back to that question", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "let me point out the obvious", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "going back to what i said earlier", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "back in 2019 we had fewer users", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "open questions are listed at the end", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}
+{"text": "the deck was shared this morning", "intent": "NO_COMMAND", "parameters": {}, "source": "authored", "datasetVersion": "v1", "featureVersion": "voice-text-v1"}

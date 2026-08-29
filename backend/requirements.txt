@@ -10,7 +10,11 @@ Werkzeug==3.0.3
 # Computer vision engine
 numpy>=1.26,<3
 opencv-python>=4.10
-mediapipe>=0.10.14
+# Pinned below 1.0: mediapipe 1.0.x aborts the process (SIGABRT in
+# TensorsToDetectionsCalculator's Metal helper) on macOS arm64 the first time the
+# hand landmarker runs on a frame. It is a native abort, so no try/except can
+# contain it - it would take the Flask server down mid-session.
+mediapipe>=0.10.14,<1.0
 
 # Presentation control
 PyAutoGUI>=0.9.54
@@ -19,3 +23,21 @@ PyAutoGUI>=0.9.54
 python-pptx>=0.6.23
 pypdf>=4.3.1
 PyMuPDF>=1.24.9
+
+# Windows only: renders .ppt/.pptx previews by driving the installed PowerPoint
+# through COM (backend/utils/files.py::_convert_to_pdf). Without it those files
+# still upload and gesture/voice control works - they simply have no thumbnails.
+# PDFs render through PyMuPDF on every platform and never need this.
+comtypes>=1.4.0; sys_platform == "win32"
+
+# Machine learning: the personalized gesture model and the voice intent model.
+# Training only needs these; inference for the gesture model is pure NumPy.
+scikit-learn>=1.5
+joblib>=1.4
+
+# Optional extras, installed separately so the base install stays small:
+#   backend/requirements-ml.txt     ONNX export / runtime for the gesture model
+#   backend/requirements-voice.txt  local Whisper speech-to-text
+
+# Tests
+pytest>=8.0

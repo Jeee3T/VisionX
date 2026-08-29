@@ -1,0 +1,17 @@
+# Optional: local speech-to-text for the voice assistant.
+#
+# Without this the intent classifier still works on typed text and gesture
+# control is entirely unaffected - the voice UI reports that speech-to-text is
+# unavailable and offers the typed fallback.
+#
+#   pip install -r backend/requirements-voice.txt
+#
+# faster-whisper runs Whisper through CTranslate2: no PyTorch, ~5x faster on CPU
+# than the reference implementation. Audio never leaves the machine.
+# The model (~75 MB for base.en) downloads on first use.
+
+faster-whisper>=1.0.3
+
+# Alternative backend, auto-detected if faster-whisper is absent. Pulls in torch
+# (~2 GB) and needs ffmpeg on PATH, so it is not the default.
+# openai-whisper>=20231117

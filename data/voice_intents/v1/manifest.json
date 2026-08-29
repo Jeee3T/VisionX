@@ -1,0 +1,42 @@
+{
+  "datasetVersion": "v1",
+  "featureVersion": "voice-text-v1",
+  "intents": [
+    "NEXT_SLIDE",
+    "PREVIOUS_SLIDE",
+    "GO_TO_SLIDE",
+    "FIRST_SLIDE",
+    "LAST_SLIDE",
+    "START_PRESENTATION",
+    "END_PRESENTATION",
+    "BLACKOUT",
+    "WHITEOUT",
+    "ENABLE_POINTER",
+    "DISABLE_POINTER",
+    "ENABLE_ANNOTATION",
+    "DISABLE_ANNOTATION",
+    "CLEAR_ANNOTATION",
+    "NO_COMMAND"
+  ],
+  "utterances": 1008,
+  "perIntent": {
+    "NEXT_SLIDE": 57,
+    "PREVIOUS_SLIDE": 55,
+    "GO_TO_SLIDE": 58,
+    "FIRST_SLIDE": 51,
+    "LAST_SLIDE": 51,
+    "START_PRESENTATION": 86,
+    "END_PRESENTATION": 73,
+    "BLACKOUT": 51,
+    "WHITEOUT": 51,
+    "ENABLE_POINTER": 56,
+    "DISABLE_POINTER": 50,
+    "ENABLE_ANNOTATION": 62,
+    "DISABLE_ANNOTATION": 51,
+    "CLEAR_ANNOTATION": 53,
+    "NO_COMMAND": 203
+  },
+  "duplicateTexts": 0,
+  "authoredBy": "hand-written in voice_assistant/data/utterances.py",
+  "updatedAt": "2026-08-29T10:37:06.922462+00:00"
+}

@@ -40,6 +40,10 @@ EXTEND_RATIO = 1.12   # tip must be this much farther from the wrist than the PI
 MARGIN_BAND = 0.22    # ratio distance over which certainty ramps from 0 to 1
 
 
+SOURCE_GEOMETRIC = "geometric"
+SOURCE_PERSONALIZED = "personalized"
+
+
 @dataclass
 class GestureResult:
     gesture: str
@@ -49,9 +53,14 @@ class GestureResult:
     pointer: tuple[float, float] | None = None   # normalised index-fingertip position
     handedness: str = ""
     timestamp: float = field(default_factory=time.time)
+    # --- set by the personalized recognizer; harmless defaults for the geometric one --
+    source: str = SOURCE_GEOMETRIC
+    probabilities: dict[str, float] | None = None   # full class distribution, when available
+    model_version: str | None = None
+    margin: float | None = None                     # top-1 minus top-2 probability
 
     def as_dict(self) -> dict:
-        return {
+        payload = {
             "gesture": self.gesture,
             "confidence": round(self.confidence, 3),
             "fingers": self.fingers,
@@ -61,7 +70,15 @@ class GestureResult:
             else None,
             "handedness": self.handedness,
             "timestamp": self.timestamp,
+            "source": self.source,
         }
+        if self.model_version:
+            payload["modelVersion"] = self.model_version
+        if self.margin is not None:
+            payload["margin"] = round(self.margin, 4)
+        if self.probabilities:
+            payload["probabilities"] = self.probabilities
+        return payload
 
 
 NO_HAND_RESULT = GestureResult(gesture=NO_HAND, confidence=0.0)

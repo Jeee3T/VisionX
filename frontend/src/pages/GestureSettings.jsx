@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Hand, RotateCcw, Save } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
+import PersonalizationCard from '../components/PersonalizationCard'
 import { ErrorState, Loader } from '../components/Feedback'
-import { gestureApi } from '../services/endpoints'
+import { gestureApi, personalizationApi } from '../services/endpoints'
 import { useToast } from '../context/ToastContext'
 import { COMMANDS, COMMAND_ORDER } from '../utils/constants'
 
@@ -31,19 +32,55 @@ export default function GestureSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [personalization, setPersonalization] = useState(null)
+  const [personalizationSaving, setPersonalizationSaving] = useState(false)
 
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    gestureApi
-      .get()
-      .then((response) => {
+    Promise.all([
+      gestureApi.get(),
+      // Personalization is additive: if it fails the bindings screen still works.
+      personalizationApi.get().catch(() => null),
+    ])
+      .then(([response, personalizationResponse]) => {
         setData(response.data)
         setDraft(response.data.preferences)
+        if (personalizationResponse) setPersonalization(personalizationResponse.data)
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+  const updatePersonalization = async (patch) => {
+    setPersonalizationSaving(true)
+    try {
+      const response = await personalizationApi.update(patch)
+      setPersonalization(response.data)
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setPersonalizationSaving(false)
+    }
+  }
+
+  const deletePersonalization = async (everything) => {
+    const question = everything
+      ? 'Delete your personalized model AND every recording you have made? Your presentations, sessions and pose bindings are not affected.'
+      : 'Delete your personalized model? VisionX will go back to the geometric recognizer.'
+    if (!window.confirm(question)) return
+    setPersonalizationSaving(true)
+    try {
+      const call = everything ? personalizationApi.deleteAll : personalizationApi.deleteModel
+      const response = await call()
+      toast.success(response.message)
+      setPersonalization((await personalizationApi.get()).data)
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setPersonalizationSaving(false)
+    }
+  }
 
   useEffect(load, [load])
 
@@ -98,7 +135,8 @@ export default function GestureSettings() {
       )}
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="card divide-y divide-ink-100 lg:col-span-2">
+        <div className="space-y-5 lg:col-span-2">
+        <div className="card divide-y divide-ink-100">
           {COMMAND_ORDER.map((command) => {
             const meta = COMMANDS[command]
             const selected = draft[meta.field]
@@ -133,6 +171,18 @@ export default function GestureSettings() {
               </div>
             )
           })}
+        </div>
+
+        {personalization && (
+          <PersonalizationCard
+            settings={personalization.settings}
+            gesture={personalization.gesture}
+            saving={personalizationSaving}
+            onToggle={updatePersonalization}
+            onDeleteModel={() => deletePersonalization(false)}
+            onDeleteAll={() => deletePersonalization(true)}
+          />
+        )}
         </div>
 
         <div className="card h-fit p-5">

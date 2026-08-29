@@ -10,6 +10,8 @@ import UploadPresentation from './pages/UploadPresentation'
 import PresentationDetails from './pages/PresentationDetails'
 import Session from './pages/Session'
 import GestureSettings from './pages/GestureSettings'
+import GestureTraining from './pages/GestureTraining'
+import VoiceAssistant from './pages/VoiceAssistant'
 import History from './pages/History'
 import Analytics from './pages/Analytics'
 import Profile from './pages/Profile'
@@ -46,6 +48,8 @@ export default function App() {
           <Route path="/presentations/:id" element={<PresentationDetails />} />
           <Route path="/upload" element={<UploadPresentation />} />
           <Route path="/gestures" element={<GestureSettings />} />
+          <Route path="/gestures/train" element={<GestureTraining />} />
+          <Route path="/voice" element={<VoiceAssistant />} />
           <Route path="/history" element={<History />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/profile" element={<Profile />} />

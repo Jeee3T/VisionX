@@ -1,0 +1,11 @@
+# Optional: ONNX export for the personalized gesture model.
+#
+# Not required to train or run it. The portable .npz weights and the NumPy
+# runtime in computer_vision/ml/mlp.py are the source of truth; ONNX is an
+# additional, verified export used at inference time when it is present.
+#
+#   pip install -r backend/requirements-ml.txt
+#   python -m computer_vision.ml.training.export_gesture_model --user <id>
+
+onnx>=1.16
+onnxruntime>=1.18

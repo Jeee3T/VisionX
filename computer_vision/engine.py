@@ -25,9 +25,12 @@ from computer_vision.gesture_recognition.debouncer import (
     STATUS_EXECUTED,
     STATUS_IDLE,
 )
-from computer_vision.gesture_recognition.gesture_recognizer import GestureRecognizer
+from computer_vision.gesture_recognition.recognizer_factory import build_recognizer
 from computer_vision.hand_detection.hand_detector import HandDetector, draw_landmarks
+from computer_vision.ml.collector import GestureSampleCollector
+from computer_vision.ml.intent_gate import REJECT_AMBIGUOUS, GestureIntentGate
 from computer_vision.preprocessing.frame_processor import preprocess
+from multimodal.context import context as multimodal_context
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +57,12 @@ class EngineConfig:
     cooldown_ms: int = 900
     mirror: bool = True
     preferences: dict = field(default_factory=dict)
+    # --- personalized recognition (optional) --------------------------------
+    user_id: str | None = None
+    personalization_enabled: bool = False
+    intent_margin: float = 0.15
+    # An ENROLLMENT engine runs the camera and the collector but dispatches nothing.
+    enrollment_mode: bool = False
 
 
 class GestureEngine:
@@ -66,7 +75,17 @@ class GestureEngine:
         self.on_pointer = on_pointer or (lambda x, y, mode: None)
 
         self.mapper = GestureMapper(config.preferences)
-        self.recognizer = GestureRecognizer()
+        # Personalized when the user has a model and has opted in; the geometric
+        # recognizer otherwise. Both satisfy the same interface, so nothing below
+        # this line knows or cares which one is running.
+        self.recognizer, self.recognizer_info = build_recognizer(
+            config.user_id, config.personalization_enabled
+        )
+        self.intent_gate = GestureIntentGate(
+            min_margin=config.intent_margin,
+            enabled=bool(self.recognizer_info.get("personalized")),
+        )
+        self.collector = GestureSampleCollector()
         self.debouncer = GestureDebouncer(config.debounce_frames, config.cooldown_ms)
 
         self._thread: threading.Thread | None = None
@@ -85,6 +104,7 @@ class GestureEngine:
         self._pointer_smooth: tuple[float, float] | None = None
         self._last_hand_seen = 0.0
         self._last_telemetry = 0.0
+        self._gated = 0
 
     # --- lifecycle -----------------------------------------------------------
     def start(self) -> None:
@@ -110,6 +130,8 @@ class GestureEngine:
         self.mode = MODE_IDLE
         self.started_at = None
         self._preview_jpeg = None
+        self.collector.cancel()
+        multimodal_context.reset()
 
     @property
     def is_running(self) -> bool:
@@ -120,6 +142,10 @@ class GestureEngine:
         self.config.preferences = preferences
         self.mapper.load(preferences)
         self.debouncer.reset()
+
+    def recognizer_stats(self) -> dict:
+        stats = getattr(self.recognizer, "stats", None)
+        return stats() if callable(stats) else {"source": "geometric"}
 
     def set_mode(self, mode: str) -> None:
         with self._lock:
@@ -138,11 +164,35 @@ class GestureEngine:
             "debounceFrames": self.config.debounce_frames,
             "cameraIndex": self.config.camera_index,
             "uptime": round(time.time() - self.started_at, 1) if self.started_at else 0,
+            "recognizer": self.recognizer_info,
+            "intentGate": self.intent_gate.describe(),
+            "gatedFrames": self._gated,
+            "enrollment": self.collector.status(),
+            "mode_kind": "ENROLLMENT" if self.config.enrollment_mode else "SESSION",
         }
 
     def preview_frame(self) -> bytes | None:
         with self._lock:
             return self._preview_jpeg
+
+    # --- enrolment capture ---------------------------------------------------
+    def begin_capture(self, label: str, subject_id: str, target_frames: int,
+                      session_id: str | None = None) -> dict:
+        """Start collecting labelled frames. Runs inside the existing camera loop."""
+        state = self.collector.start(label, subject_id, target_frames, session_id)
+        self._emit({"type": "enrollment", **state.as_dict()})
+        return state.as_dict()
+
+    def cancel_capture(self) -> None:
+        self.collector.cancel()
+        self._emit({"type": "enrollment", "cancelled": True})
+
+    def take_capture(self):
+        """Hand the captured samples to the caller, which persists them off-thread."""
+        return self.collector.take()
+
+    def capture_status(self) -> dict | None:
+        return self.collector.status()
 
     # --- main loop -----------------------------------------------------------
     def _run(self) -> None:
@@ -171,6 +221,7 @@ class GestureEngine:
         logger.info("Gesture engine running (camera %s)", self.config.camera_index)
 
         frame_times: list[float] = []
+        last_capture_count = -1
 
         try:
             while not self._stop.is_set():
@@ -195,6 +246,19 @@ class GestureEngine:
                 hand = detector.detect(processed.rgb)
                 result = self.recognizer.recognize(hand, processed.aspect)
 
+                # Enrolment: collect labelled frames without dispatching anything.
+                # Pure in-memory work - the recording is written to disk elsewhere.
+                capture = self.collector.offer(hand, processed.aspect, processed.brightness)
+                if capture is not None and capture.accepted != last_capture_count:
+                    last_capture_count = capture.accepted
+                    self._emit({"type": "enrollment", **capture.as_dict()})
+
+                # The intent gate turns an ambiguous frame into the neutral state the
+                # debouncer already handles. It never invents a command.
+                result, gate_reason = self.intent_gate.apply(result)
+                if gate_reason == REJECT_AMBIGUOUS:
+                    self._gated += 1
+
                 command = self.mapper.map(result.gesture) if result.hand_detected else None
                 decision = self.debouncer.submit(
                     result.gesture,
@@ -205,10 +269,15 @@ class GestureEngine:
 
                 if result.hand_detected:
                     self._last_hand_seen = loop_start
+                multimodal_context.update_hand(result.hand_detected)
 
                 pointer = self._track_pointer(result.pointer)
+                if pointer is not None:
+                    # Published for multimodal commands ("highlight this") to resolve
+                    # against; publishing is a lock + two floats.
+                    multimodal_context.update_pointer(pointer[0], pointer[1], self.mode)
 
-                if decision.fire and decision.command:
+                if decision.fire and decision.command and not self.config.enrollment_mode:
                     self._handle_command(decision.command, pointer)
 
                 if pointer is not None and self.mode != MODE_IDLE:
@@ -237,6 +306,10 @@ class GestureEngine:
                         "mode": self.mode,
                         "handDetected": result.hand_detected,
                         "pointer": {"x": pointer[0], "y": pointer[1]} if pointer else None,
+                        "source": result.source,
+                        "modelVersion": result.model_version,
+                        "margin": result.margin,
+                        "gateReason": gate_reason,
                         "lowLight": processed.brightness < LOW_LIGHT_THRESHOLD,
                         "idleSeconds": round(now - self._last_hand_seen, 1) if self._last_hand_seen else None,
                         "fps": round(self.fps, 1),

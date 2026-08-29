@@ -48,6 +48,10 @@ class KeyboardBackend:
     def hotkey(self, *keys: str) -> None:
         self._gui().hotkey(*keys)
 
+    def write(self, text: str) -> None:
+        """Type literal characters. PowerPoint's 'jump to slide' is digits + Enter."""
+        self._gui().write(str(text))
+
     def move_to(self, x: int, y: int) -> None:
         self._gui().moveTo(x, y)
 

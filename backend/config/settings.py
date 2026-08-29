@@ -55,6 +55,26 @@ class Settings:
     CV_DEBOUNCE_FRAMES = _int("CV_DEBOUNCE_FRAMES", 6)
     CV_COOLDOWN_MS = _int("CV_COOLDOWN_MS", 900)
 
+    # --- Personalized gesture recognition (opt-in, per user) -----------------
+    # Off by default: a user has no model until they enrol, and the geometric
+    # recognizer runs unchanged until they do.
+    PERSONALIZATION_DEFAULT_ENABLED = os.getenv("PERSONALIZATION_DEFAULT_ENABLED", "0") == "1"
+    GESTURE_INTENT_MARGIN = float(os.getenv("GESTURE_INTENT_MARGIN", "0.15"))
+    ENROLLMENT_FRAMES_PER_RECORDING = _int("ENROLLMENT_FRAMES_PER_RECORDING", 60)
+    ENROLLMENT_RECORDINGS_PER_GESTURE = _int("ENROLLMENT_RECORDINGS_PER_GESTURE", 3)
+    GESTURE_DATA_DIR = os.getenv("VISIONX_GESTURE_DATA_DIR") or None
+    USER_MODEL_DIR = os.getenv("VISIONX_USER_MODEL_DIR") or None
+
+    # --- Voice assistant -----------------------------------------------------
+    VOICE_DEFAULT_ENABLED = os.getenv("VOICE_DEFAULT_ENABLED", "0") == "1"
+    VOICE_STT_BACKEND = os.getenv("VOICE_STT_BACKEND") or None   # None = auto-detect
+    VOICE_WHISPER_MODEL = os.getenv("VISIONX_WHISPER_MODEL", "base.en")
+    VOICE_EXECUTE_THRESHOLD = float(os.getenv("VOICE_EXECUTE_THRESHOLD", "0.75"))
+    VOICE_CONFIRM_THRESHOLD = float(os.getenv("VOICE_CONFIRM_THRESHOLD", "0.50"))
+    # Transcripts are command-level telemetry, not audio. Raw audio is never stored.
+    VOICE_RETAIN_TRANSCRIPTS = os.getenv("VOICE_RETAIN_TRANSCRIPTS", "1") == "1"
+    MAX_UTTERANCE_MB = _int("MAX_UTTERANCE_MB", 8)
+
     @classmethod
     def ensure_dirs(cls) -> None:
         cls.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

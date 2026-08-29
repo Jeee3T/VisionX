@@ -16,6 +16,7 @@ import {
 import StatusStrip from '../components/session/StatusStrip'
 import CameraPreview from '../components/session/CameraPreview'
 import SlideStage from '../components/session/SlideStage'
+import VoicePanel from '../components/session/VoicePanel'
 import { ErrorState, Loader } from '../components/Feedback'
 import useEngineStream from '../hooks/useEngineStream'
 import useIdle from '../hooks/useIdle'
@@ -23,8 +24,10 @@ import {
   annotationApi,
   engineApi,
   gestureApi,
+  personalizationApi,
   presentationApi,
   sessionApi,
+  voiceApi,
 } from '../services/endpoints'
 import { useToast } from '../context/ToastContext'
 import { COMMANDS, COMMAND_ORDER } from '../utils/constants'
@@ -45,6 +48,8 @@ export default function Session() {
   const [cameraIndex, setCameraIndex] = useState(0)
   const [threshold, setThreshold] = useState(0.72)
   const [session, setSession] = useState(null)
+  const [voice, setVoice] = useState(null)
+  const [personalization, setPersonalization] = useState(null)
   const [startError, setStartError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(null)
@@ -65,15 +70,23 @@ export default function Session() {
   // --- setup data ----------------------------------------------------------
   useEffect(() => {
     let cancelled = false
-    const requests = [gestureApi.get(), engineApi.cameras().catch(() => ({ data: { cameras: [] } }))]
+    const requests = [
+      gestureApi.get(),
+      engineApi.cameras().catch(() => ({ data: { cameras: [] } })),
+      // Voice and personalization are additive - a failure here must not stop a session.
+      voiceApi.status().catch(() => null),
+      personalizationApi.get().catch(() => null),
+    ]
     if (presentationId) requests.push(presentationApi.get(presentationId))
 
     Promise.all(requests)
-      .then(([gestures, cameraList, deck]) => {
+      .then(([gestures, cameraList, voiceStatus, personalizationState, deck]) => {
         if (cancelled) return
         setBindings({ preferences: gestures.data.preferences, poses: gestures.data.poses })
         setCameras(cameraList.data.cameras || [])
         setCameraIndex((cameraList.data.cameras || [])[0] ?? 0)
+        if (voiceStatus) setVoice(voiceStatus.data)
+        if (personalizationState) setPersonalization(personalizationState.data)
         if (deck) setPresentation(deck.data.presentation)
       })
       .catch((err) => !cancelled && setLoadError(err.message))
@@ -327,7 +340,31 @@ export default function Session() {
               </Link>
             </div>
 
-            <div className="mt-6 rounded-xl bg-ink-50 p-4 text-xs leading-relaxed text-ink-500">
+            <div className="mt-6 grid gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-ink-200 px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-ink-400">Recognition</p>
+                <p className="mt-0.5 text-sm font-medium text-ink-800">
+                  {personalization?.settings?.gesturePersonalizationEnabled &&
+                  personalization?.gesture?.model?.available
+                    ? 'Your personalized model'
+                    : 'Built-in geometric recognizer'}
+                </p>
+                <Link to="/gestures" className="mt-0.5 inline-block text-xs text-brand-600 hover:text-brand-700">
+                  {personalization?.gesture?.model?.available ? 'Change' : 'Train your own'}
+                </Link>
+              </div>
+              <div className="rounded-xl border border-ink-200 px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-ink-400">Voice control</p>
+                <p className="mt-0.5 text-sm font-medium text-ink-800">
+                  {voice?.ready ? 'Push-to-talk armed' : 'Off'}
+                </p>
+                <Link to="/voice" className="mt-0.5 inline-block text-xs text-brand-600 hover:text-brand-700">
+                  {voice?.ready ? 'Voice settings' : 'Set up voice'}
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl bg-ink-50 p-4 text-xs leading-relaxed text-ink-500">
               Open your slideshow in PowerPoint (F5) on this machine before starting. VisionX sends real key
               presses, so whichever window has focus receives the commands.
             </div>
@@ -444,6 +481,18 @@ export default function Session() {
           </button>
         </div>
 
+        {voice?.ready && (
+          <VoicePanel
+            sessionId={session?.id}
+            hidden={idle}
+            onCommand={(result) => {
+              // A voice command lands in the same dispatcher, so the slide it
+              // reports is authoritative for the stage.
+              if (result?.result?.currentSlide) setSlide(result.result.currentSlide)
+            }}
+          />
+        )}
+
         <StatusStrip
           telemetry={telemetry}
           lastCommand={lastCommand}
@@ -455,7 +504,9 @@ export default function Session() {
 
         <p className={`text-[11px] text-white/35 transition-opacity duration-500 ${idle ? 'opacity-0' : 'opacity-100'}`}>
           Slide {slide}
-          {presentation?.totalSlides ? ` of ${presentation.totalSlides}` : ''} · keyboard fallback:{' '}
+          {presentation?.totalSlides ? ` of ${presentation.totalSlides}` : ''}
+          {engineState?.recognizer?.personalized ? ' · personalized model' : ''}
+          {voice?.ready ? ' · voice on' : ''} · keyboard fallback:{' '}
           <ChevronLeft size={11} className="inline" /> <ChevronRight size={11} className="inline" /> P A E
           {ending ? ' · ending…' : ''}
         </p>

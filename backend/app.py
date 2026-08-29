@@ -4,7 +4,6 @@ Run with:  python app.py      (from the backend/ directory)
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -25,9 +24,11 @@ from routes.annotation_routes import annotation_bp  # noqa: E402
 from routes.auth_routes import auth_bp  # noqa: E402
 from routes.engine_routes import engine_bp  # noqa: E402
 from routes.gesture_routes import gesture_bp  # noqa: E402
+from routes.personalization_routes import personalization_bp  # noqa: E402
 from routes.presentation_routes import presentation_bp  # noqa: E402
 from routes.session_routes import session_bp  # noqa: E402
 from routes.user_routes import user_bp  # noqa: E402
+from routes.voice_routes import voice_bp  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,7 +53,8 @@ def create_app() -> Flask:
     settings.ensure_dirs()
 
     for blueprint in (auth_bp, user_bp, presentation_bp, gesture_bp,
-                      session_bp, annotation_bp, analytics_bp, engine_bp):
+                      session_bp, annotation_bp, analytics_bp, engine_bp,
+                      personalization_bp, voice_bp):
         app.register_blueprint(blueprint)
 
     register_error_handlers(app)
@@ -61,6 +63,9 @@ def create_app() -> Flask:
     def health():
         from services.engine_service import engine_service
 
+        from voice_assistant.intent.classifier import model_status as intent_model_status
+        from voice_assistant.speech.factory import probe as speech_probe
+
         return jsonify({
             "success": True,
             "data": {
@@ -68,6 +73,8 @@ def create_app() -> Flask:
                 "database": "connected" if database.is_connected() else "disconnected",
                 "engine": engine_service.status().get("state", "STOPPED"),
                 "uploadDir": str(settings.UPLOAD_DIR),
+                "voiceIntentModel": intent_model_status().get("available", False),
+                "speechBackends": speech_probe(),
             },
             "message": "VisionX API is running.",
         })
