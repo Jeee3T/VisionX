@@ -5,6 +5,7 @@ Run with:  python app.py      (from the backend/ directory)
 
 import logging
 import sys
+import threading
 from pathlib import Path
 
 # The CV engine and presentation controller live beside backend/ in the repo root.
@@ -37,6 +38,31 @@ logging.basicConfig(
 logger = logging.getLogger("visionx")
 
 
+_health_bridge = None
+_health_bridge_lock = threading.Lock()
+
+
+def _powerpoint_health() -> dict:
+    """Whether a PowerPoint slideshow is reachable. Never raises.
+
+    One shared bridge rather than one per request: building a new one on every
+    health check would attach to PowerPoint again on every request thread. The
+    bridge holds its interface pointer thread-locally, so sharing it here is safe.
+    """
+    global _health_bridge
+    try:
+        from presentation_controller.windows import PowerPointComBridge
+
+        if _health_bridge is None:
+            with _health_bridge_lock:
+                if _health_bridge is None:
+                    _health_bridge = PowerPointComBridge()
+        return {"slideshow": _health_bridge.probe(),
+                "reason": _health_bridge.unavailable_reason}
+    except Exception as exc:  # noqa: BLE001 - health must never 500
+        return {"slideshow": "UNKNOWN", "reason": str(exc)}
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = settings.MAX_CONTENT_LENGTH
@@ -51,6 +77,19 @@ def create_app() -> Flask:
     )
 
     settings.ensure_dirs()
+
+    # VisionX drives the PowerPoint running on this same machine, so the process
+    # has to see the display the way Windows really lays it out. Per-monitor DPI
+    # awareness must be set before anything asks for the screen size, and every
+    # laptop ships scaled to 125% or 150% - without this the virtual pointer
+    # lands at roughly 80% of where the presenter is pointing.
+    from presentation_controller.windows import IS_WINDOWS, enable_dpi_awareness
+
+    if IS_WINDOWS and not enable_dpi_awareness():
+        logger.warning(
+            "Could not enable per-monitor DPI awareness. On a scaled display the "
+            "virtual pointer may not line up with the presenter's fingertip."
+        )
 
     for blueprint in (auth_bp, user_bp, presentation_bp, gesture_bp,
                       session_bp, annotation_bp, analytics_bp, engine_bp,
@@ -75,6 +114,10 @@ def create_app() -> Flask:
                 "uploadDir": str(settings.UPLOAD_DIR),
                 "voiceIntentModel": intent_model_status().get("available", False),
                 "speechBackends": speech_probe(),
+                # Whether VisionX can see a PowerPoint slideshow right now. The
+                # pen and the eraser both depend on one running, and this is the
+                # cheapest way for a presenter to check before they start.
+                "powerpoint": _powerpoint_health(),
             },
             "message": "VisionX API is running.",
         })

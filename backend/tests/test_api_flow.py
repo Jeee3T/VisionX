@@ -337,6 +337,66 @@ def run() -> int:
             check("slide unchanged after ordinary speech", status["currentSlide"] == 3,
                   str(status.get("currentSlide")))
 
+            # --- continuous listening: "Vision <command> OK" -----------------
+            # Same session, same dispatcher. The wake-word machine only decides
+            # *when* there is a command; everything after it is unchanged.
+            client.post("/api/voice/wake/reset", headers=auth)
+
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "as you can see revenue grew twelve percent",
+                                         "sessionId": voice_session_id})
+            segment = response.json["data"]
+            check("continuous listening ignores ordinary speech",
+                  segment["executed"] is False and segment["wake"]["action"] == "IDLE",
+                  response.get_data(as_text=True))
+
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "next slide please",
+                                         "sessionId": voice_session_id})
+            check("a command phrase without the wake word does nothing",
+                  response.json["data"]["executed"] is False)
+
+            status = client.get("/api/engine/status", headers=auth).json["data"]
+            check("slide unchanged by ordinary speech in continuous mode",
+                  status["currentSlide"] == 3, str(status.get("currentSlide")))
+
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "vision go to slide 2 ok",
+                                         "sessionId": voice_session_id})
+            segment = response.json["data"]
+            check("'Vision <command> OK' executes immediately",
+                  segment["executed"] is True, response.get_data(as_text=True))
+            check("the captured command is what the model classified",
+                  segment["wake"]["command"] == "go to slide 2" and
+                  segment["command"] == "GO_TO_SLIDE", str(segment.get("wake")))
+            check("continuous command moved the deck",
+                  segment["result"]["currentSlide"] == 2, str(segment.get("result")))
+
+            response = client.get("/api/voice/wake", headers=auth)
+            check("listening resumes after a command",
+                  response.json["data"]["state"] == "LISTENING",
+                  response.get_data(as_text=True))
+
+            # The same command split across recorder segments must behave identically.
+            client.post("/api/voice/stream/text", headers=auth,
+                        json={"text": "vision", "sessionId": voice_session_id})
+            response = client.get("/api/voice/wake", headers=auth)
+            check("the wake word arms command mode",
+                  response.json["data"]["state"] == "CAPTURING")
+
+            client.post("/api/voice/stream/text", headers=auth,
+                        json={"text": "go to slide 1", "sessionId": voice_session_id})
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "ok", "sessionId": voice_session_id})
+            segment = response.json["data"]
+            check("a command split across segments executes on the terminator",
+                  segment["executed"] is True and segment["result"]["currentSlide"] == 1,
+                  response.get_data(as_text=True))
+
+            # Put the deck back where the assertions below expect it.
+            client.post("/api/engine/command", headers=auth,
+                        json={"command": "GO_TO_SLIDE", "parameters": {"slideNumber": 3}})
+
             # The control bar and voice share one dispatcher and one set of counters.
             response = client.post("/api/engine/command", headers=auth,
                                    json={"command": "GO_TO_SLIDE", "parameters": {"slideNumber": 2}})

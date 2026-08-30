@@ -66,6 +66,26 @@ class PresentationController(ABC):
     def whiteout(self) -> None:
         self._unsupported("whiting out the screen")
 
+    # --- pen strokes ----------------------------------------------------------
+    # Drawing is a drag, not a move: a controller that can annotate needs to hold
+    # a button down between `pen_down` and `pen_up`. No-ops by default so a
+    # controller that draws some other way is still a valid implementation.
+    def pen_down(self) -> None:
+        """Begin a stroke at the current pointer position."""
+
+    def pen_up(self) -> None:
+        """End the stroke in progress, if any."""
+
+    @property
+    def pen_is_down(self) -> bool:
+        return False
+
+    def slideshow_state(self) -> str:
+        """CONFIRMED / DENIED / UNKNOWN - is a slideshow actually running?"""
+        from presentation_controller.windows import SLIDESHOW_UNKNOWN
+
+        return SLIDESHOW_UNKNOWN
+
     def capabilities(self) -> set[str]:
         """Command names this controller can actually deliver."""
         from computer_vision.command_mapping.gesture_mapper import COMMANDS

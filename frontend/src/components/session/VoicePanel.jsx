@@ -1,43 +1,78 @@
-import { useCallback, useState } from 'react'
-import { Check, Loader2, Mic, MicOff, X } from 'lucide-react'
-import useVoiceCapture from '../../hooks/useVoiceCapture'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Check, Ear, Loader2, Mic, MicOff, X } from 'lucide-react'
+import useContinuousVoice from '../../hooks/useContinuousVoice'
 import { voiceApi } from '../../services/endpoints'
 
 /**
- * Push-to-talk during a live session.
+ * Continuous voice control during a live session.
  *
- * Hold the button, say the command, release. Nothing is recorded between
- * presses. A high-confidence command runs immediately; a middling one appears
- * here as a confirmation the presenter can accept or dismiss; a low-confidence
- * one is discarded silently and never reaches PowerPoint.
+ * The presenter turns the microphone on once and then never touches the web app
+ * again. VisionX listens the whole time and acts only on what is addressed to it:
+ *
+ *     [Listening] -> "Vision" -> [Command] -> "go to next slide" -> "OK" -> run
+ *                 <- back to listening
+ *
+ * Everything said between commands is ordinary speech and does nothing. A
+ * completed command still goes through the same trained intent model as before,
+ * so a middling-confidence one appears here as a confirmation rather than moving
+ * the deck on its own.
  */
+const WAKE_WORD = 'Vision'
+const TERMINATOR = 'OK'
+
 export default function VoicePanel({ sessionId, hidden, onCommand }) {
-  const [state, setState] = useState('idle') // idle | processing | done
   const [decision, setDecision] = useState(null)
+  const [wake, setWake] = useState(null)
   const [failure, setFailure] = useState(null)
+  const [confirming, setConfirming] = useState(false)
+  const [wanted, setWanted] = useState(false)
+
+  // The last decision is cleared a few seconds after it lands so the overlay does
+  // not sit on top of the slide for the rest of the talk.
+  const clearTimer = useRef(null)
+  useEffect(() => () => clearTimeout(clearTimer.current), [])
 
   const send = useCallback(
     async (blob) => {
-      setState('processing')
-      setFailure(null)
       try {
-        const response = await voiceApi.utterance(blob, { sessionId })
-        setDecision(response.data)
-        setState('done')
-        if (response.data.executed && onCommand) onCommand(response.data)
+        const response = await voiceApi.stream(blob, { sessionId })
+        const data = response.data
+        setFailure(null)
+        setWake(data.wake || null)
+
+        // Only a completed command produces a decision worth showing.
+        if (data.wake?.action === 'EXECUTE' || data.executed || data.requiresConfirmation) {
+          setDecision(data)
+          clearTimeout(clearTimer.current)
+          clearTimer.current = setTimeout(() => setDecision(null), 6000)
+          if (data.executed && onCommand) onCommand(data)
+        }
       } catch (err) {
         setFailure(err.message)
-        setState('idle')
       }
     },
     [sessionId, onCommand],
   )
 
-  const { supported, recording, level, error, start, stop } = useVoiceCapture({ onUtterance: send })
+  const { supported, listening, level, busy, error, dropped, start, stop } = useContinuousVoice({
+    onSegment: send,
+    enabled: wanted,
+  })
+
+  const toggle = () => {
+    if (listening) {
+      setWanted(false)
+      stop()
+      voiceApi.resetWake().catch(() => {})
+    } else {
+      setWanted(true)
+      start()
+    }
+  }
 
   const confirm = async () => {
     if (!decision?.transcript) return
-    setState('processing')
+    setConfirming(true)
     try {
       const response = await voiceApi.confirm(decision.transcript, sessionId)
       setDecision(response.data)
@@ -45,21 +80,33 @@ export default function VoicePanel({ sessionId, hidden, onCommand }) {
     } catch (err) {
       setFailure(err.message)
     } finally {
-      setState('done')
+      setConfirming(false)
     }
   }
 
   if (!supported) return null
 
-  const busy = state === 'processing'
+  const capturing = wake?.state === 'CAPTURING'
   const needsConfirmation = decision?.requiresConfirmation && !decision?.executed
+  const showing = decision || failure || capturing
 
   return (
     <div
       className={`flex flex-col items-center gap-2 transition-opacity duration-500 ${
-        hidden && !recording && !needsConfirmation ? 'opacity-0' : 'opacity-100'
+        hidden && !showing && !listening ? 'opacity-0' : 'opacity-100'
       }`}
     >
+      {/* Mid-command: show what has been captured so far, so a presenter who
+          forgets to say "OK" can see that VisionX is still waiting. */}
+      {capturing && !decision && (
+        <div className="max-w-md rounded-2xl border border-brand-400/30 bg-ink-900/85 px-3.5 py-2 text-center backdrop-blur">
+          <p className="text-xs text-brand-300">
+            Listening for your command — say &ldquo;{TERMINATOR}&rdquo; to run it
+          </p>
+          {wake?.buffered && <p className="mt-0.5 text-sm text-white">{wake.buffered}</p>}
+        </div>
+      )}
+
       {/* What VisionX heard and decided. */}
       {(decision || failure) && (
         <div className="max-w-md rounded-2xl border border-white/10 bg-ink-900/85 px-3.5 py-2.5 text-center backdrop-blur">
@@ -68,20 +115,22 @@ export default function VoicePanel({ sessionId, hidden, onCommand }) {
           ) : (
             <>
               <p className="text-xs text-white/50">
-                I heard: &ldquo;{decision.transcript || '…'}&rdquo;
+                I heard: &ldquo;{decision.wake?.command || decision.transcript || '…'}&rdquo;
               </p>
               <p className="mt-0.5 text-sm font-medium text-white">
-                {decision.commandLabel || decision.intentLabel}
+                {decision.commandLabel || decision.intentLabel || decision.message}
                 {decision.parameters?.slideNumber ? ` ${decision.parameters.slideNumber}` : ''}
                 {decision.parameters?.count > 1 ? ` x${decision.parameters.count}` : ''}
-                <span className="ml-2 text-xs font-normal text-white/45">
-                  {Math.round(decision.probability * 100)}%
-                </span>
+                {decision.probability != null && (
+                  <span className="ml-2 text-xs font-normal text-white/45">
+                    {Math.round(decision.probability * 100)}%
+                  </span>
+                )}
               </p>
 
               {needsConfirmation ? (
                 <div className="mt-2 flex justify-center gap-2">
-                  <button onClick={confirm} disabled={busy} className="btn-primary px-3 py-1.5 text-xs">
+                  <button onClick={confirm} disabled={confirming} className="btn-primary px-3 py-1.5 text-xs">
                     <Check size={13} /> Run it
                   </button>
                   <button
@@ -103,40 +152,52 @@ export default function VoicePanel({ sessionId, hidden, onCommand }) {
 
       {error && <p className="max-w-xs text-center text-[11px] text-amber-300">{error}</p>}
 
-      {/* Push-to-talk. Held, never latched: the microphone is only live while pressed. */}
+      {/* Transcription is falling behind the microphone. Say so, rather than
+          quietly missing commands and leaving the presenter to guess. */}
+      {dropped > 0 && !error && (
+        <p className="max-w-xs text-center text-[11px] text-amber-300/80">
+          Speech-to-text is running behind — {dropped} segment{dropped === 1 ? '' : 's'} skipped.
+          A smaller Whisper model will keep up better.
+        </p>
+      )}
+
+      {/* One switch for the whole talk. Not push-to-talk: the microphone stays
+          open and the wake word decides what counts as a command. */}
       <button
-        onMouseDown={start}
-        onMouseUp={stop}
-        onMouseLeave={() => recording && stop()}
-        onTouchStart={(event) => {
-          event.preventDefault()
-          start()
-        }}
-        onTouchEnd={stop}
-        disabled={busy}
-        title="Hold to speak a command"
+        onClick={toggle}
+        title={listening ? 'Stop listening' : `Listen continuously for "${WAKE_WORD} … ${TERMINATOR}"`}
+        aria-pressed={listening}
         className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all ${
-          recording
-            ? 'bg-rose-500 text-white shadow-lift'
-            : 'border border-white/10 bg-ink-900/85 text-white/70 backdrop-blur hover:text-white'
+          capturing
+            ? 'bg-brand-500 text-white shadow-lift'
+            : listening
+              ? 'bg-emerald-500/90 text-white shadow-lift'
+              : 'border border-white/10 bg-ink-900/85 text-white/70 backdrop-blur hover:text-white'
         }`}
       >
         {busy ? (
           <Loader2 size={19} className="animate-spin" />
-        ) : recording ? (
+        ) : capturing ? (
           <Mic size={19} />
+        ) : listening ? (
+          <Ear size={19} />
         ) : (
           <MicOff size={19} />
         )}
-        {recording && (
+        {listening && (
           <span
-            className="pointer-events-none absolute inset-0 rounded-full border-2 border-rose-300"
+            className="pointer-events-none absolute inset-0 rounded-full border-2 border-white/50"
             style={{ transform: `scale(${1 + level * 0.5})`, opacity: 1 - level * 0.6 }}
           />
         )}
       </button>
-      <p className="text-[11px] text-white/35">
-        {recording ? 'Listening — release to send' : 'Hold to speak'}
+
+      <p className="text-center text-[11px] text-white/35">
+        {capturing
+          ? `Command mode — end with "${TERMINATOR}"`
+          : listening
+            ? `Listening — say "${WAKE_WORD} … ${TERMINATOR}"`
+            : 'Turn on voice control'}
       </p>
     </div>
   )

@@ -244,13 +244,59 @@ arrives as `{"type": "training"}` SSE events, and `GET /personalization/train/st
 
 | Method | Path | Body | Returns |
 | --- | --- | --- | --- |
-| GET | `/voice/status` | — | `{enabled, ready, canInterpretText, blockers[], intentModel, speechBackends, thresholds}` |
+| GET | `/voice/status` | — | `{enabled, ready, canInterpretText, blockers[], intentModel, speechBackends, thresholds, continuous}` |
 | GET | `/voice/commands` | — | `{intents: [{intent, label, command, examples[]}]}` |
-| POST | `/voice/utterance` | `multipart/form-data`: `audio`, `execute?`, `sessionId?` | decision (below) |
+| POST | `/voice/utterance` | `multipart/form-data`: `audio`, `execute?`, `sessionId?` | decision (below) — push-to-talk |
+| POST | `/voice/stream` | `multipart/form-data`: `audio`, `execute?`, `sessionId?` | segment result (below) — **continuous listening** |
+| POST | `/voice/stream/text` | `{text, execute?, sessionId?}` | segment result — the typed/test equivalent |
+| GET | `/voice/wake` | — | `{state, buffered, wakeWords[], terminators[], captureTimeout, armedFor}` |
+| POST | `/voice/wake/reset` | — | same, back to `LISTENING` |
 | POST | `/voice/interpret` | `{text, execute?, sessionId?}` | decision (below) |
 | POST | `/voice/confirm` | `{text, sessionId?}` | decision, executed |
 | GET | `/voice/history` | `?limit&sessionId` | `{commands[]}` |
 | DELETE | `/voice/history` | — | `{deleted}` |
+
+### Continuous listening — `POST /voice/stream`
+
+The browser records continuously and posts ~3-second segments. Each is transcribed and offered to
+that user's wake-word machine; **most segments do nothing at all**. The trained intent model only
+sees text that the presenter framed as a command with `"Vision" … "OK"`.
+
+A segment result always carries `wake`, and carries a full decision only when a command completed:
+
+```jsonc
+{
+  "wake": {
+    "action": "EXECUTE",     // IDLE | ARMED | CAPTURING | EXECUTE | TIMEOUT
+    "state": "LISTENING",    // LISTENING | CAPTURING  (state AFTER this segment)
+    "command": "go to next slide",   // the text between the wake word and "OK"
+    "heard": "vision go to next slide ok",
+    "buffered": "go to next slide",
+    "matchedWake": "vision", "matchedTerminator": "ok",
+    "shouldExecute": true,
+    // Every command completed in this segment, in the order spoken. A 3-second
+    // recording can span a sentence boundary ("...slide two OK. Vision, next
+    // slide, OK"), so this is occasionally longer than one - and every entry is
+    // run, not just the last.
+    "commands": ["go to next slide"]
+  },
+  "executed": true,
+  "command": "NEXT_SLIDE",
+  // ... plus every field of a decision, when one was produced.
+  // "decisions" carries all of them when a segment completed more than one.
+}
+```
+
+| `action` | Meaning |
+| --- | --- |
+| `IDLE` | ordinary speech; nothing was addressed to VisionX |
+| `ARMED` | the wake word was heard; now collecting a command |
+| `CAPTURING` | more command words collected, no terminator yet |
+| `EXECUTE` | the terminator was heard — `command` was interpreted and, if it cleared the gate, run |
+| `TIMEOUT` | the command never ended (12 s, or absurdly long); abandoned, back to listening |
+
+The machine is stateful **per user** and lives on the server, so a page reload does not lose a
+half-spoken command. `POST /voice/wake/reset` abandons one deliberately.
 
 A decision:
 

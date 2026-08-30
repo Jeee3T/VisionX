@@ -252,9 +252,19 @@ def test_voice_state_setting_is_idempotent(dispatcher):
     assert dispatcher.annotation_active is False
 
 
-def test_debouncer_behaviour_is_unchanged():
-    """The three safety conditions still hold exactly as documented."""
+def test_debouncer_safety_conditions():
+    """The four safety conditions hold exactly as documented.
+
+    Changed deliberately from the original: the neutral state now has to be
+    *held* for `release_frames` frames before a repeat is unlocked. A single
+    neutral frame used to be enough, and that was the repeat bug - see
+    test_a_single_dropped_frame_cannot_repeat_a_held_gesture.
+    """
     debouncer = GestureDebouncer(required_frames=3, cooldown_ms=0)
+    # Symmetric with the hold requirement: releasing a gesture takes as long as
+    # making one. Half of it left no margin once the stabilizer's own lag was
+    # accounted for - see test_gesture_stability.py.
+    assert debouncer.release_frames == 3
 
     assert not debouncer.submit("PINKY_UP", "NEXT_SLIDE", 0.4, 0.7).fire     # confidence gate
     assert not debouncer.submit("PINKY_UP", "NEXT_SLIDE", 0.9, 0.7).fire     # persistence
@@ -266,7 +276,15 @@ def test_debouncer_behaviour_is_unchanged():
         decision = debouncer.submit("PINKY_UP", "NEXT_SLIDE", 0.9, 0.7)
     assert not decision.fire and decision.status == STATUS_WAIT_NEUTRAL     # neutral required
 
+    # One neutral frame is no longer enough to unlock the repeat.
     debouncer.submit(NO_HAND, None, 0.0, 0.7)
+    for _ in range(3):
+        decision = debouncer.submit("PINKY_UP", "NEXT_SLIDE", 0.9, 0.7)
+    assert not decision.fire and decision.status == STATUS_WAIT_NEUTRAL
+
+    # A hand genuinely lowered - neutral held for release_frames - does unlock it.
+    for _ in range(debouncer.release_frames):
+        debouncer.submit(NO_HAND, None, 0.0, 0.7)
     for _ in range(3):
         decision = debouncer.submit("PINKY_UP", "NEXT_SLIDE", 0.9, 0.7)
     assert decision.fire

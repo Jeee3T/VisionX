@@ -55,6 +55,17 @@ class Settings:
     CV_DEBOUNCE_FRAMES = _int("CV_DEBOUNCE_FRAMES", 6)
     CV_COOLDOWN_MS = _int("CV_COOLDOWN_MS", 900)
 
+    # --- temporal stability --------------------------------------------------
+    # Plurality vote over this many frames before a pose reaches the command
+    # mapper: one stray frame can never become a command, so INDEX+MIDDLE stays
+    # the pointer instead of flickering into the pen. 5 at ~30 fps is ~165 ms.
+    CV_STABILIZER_WINDOW = _int("CV_STABILIZER_WINDOW", 5)
+    # Consecutive neutral frames before a held gesture may fire the same command
+    # again. 0 means "half the debounce requirement", which is the default. A
+    # single neutral frame used to be enough, and that is what made a held
+    # gesture walk through the deck.
+    CV_RELEASE_FRAMES = _int("CV_RELEASE_FRAMES", 0)
+
     # --- Personalized gesture recognition (opt-in, per user) -----------------
     # Off by default: a user has no model until they enrol, and the geometric
     # recognizer runs unchanged until they do.

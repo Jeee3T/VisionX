@@ -110,4 +110,21 @@ export const voiceApi = {
       timeout: 60000,
     })
   },
+
+  // --- continuous listening ("Vision <command> OK") ------------------------
+  // One short segment from the always-on microphone. Most segments are ordinary
+  // speech and come back with action IDLE, having done nothing at all.
+  stream: (blob, { sessionId, execute = true } = {}) => {
+    const form = new FormData()
+    form.append('audio', blob, 'segment.webm')
+    form.append('execute', execute ? '1' : '0')
+    if (sessionId) form.append('sessionId', sessionId)
+    return api.post('/voice/stream', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000,
+    })
+  },
+  streamText: (text, options = {}) => api.post('/voice/stream/text', { text, ...options }),
+  wake: () => api.get('/voice/wake'),
+  resetWake: () => api.post('/voice/wake/reset'),
 }

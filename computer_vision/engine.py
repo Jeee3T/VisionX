@@ -26,6 +26,7 @@ from computer_vision.gesture_recognition.debouncer import (
     STATUS_IDLE,
 )
 from computer_vision.gesture_recognition.recognizer_factory import build_recognizer
+from computer_vision.gesture_recognition.stabilizer import GestureStabilizer
 from computer_vision.hand_detection.hand_detector import HandDetector, draw_landmarks
 from computer_vision.ml.collector import GestureSampleCollector
 from computer_vision.ml.intent_gate import REJECT_AMBIGUOUS, GestureIntentGate
@@ -57,6 +58,12 @@ class EngineConfig:
     cooldown_ms: int = 900
     mirror: bool = True
     preferences: dict = field(default_factory=dict)
+    # --- temporal stability --------------------------------------------------
+    # A plurality vote over this many frames before a pose reaches the mapper, and
+    # this many neutral frames before a held gesture may repeat. Both exist to stop
+    # one stray frame from becoming a command; see stabilizer.py / debouncer.py.
+    stabilizer_window: int = 5
+    release_frames: int | None = None
     # --- personalized recognition (optional) --------------------------------
     user_id: str | None = None
     personalization_enabled: bool = False
@@ -66,13 +73,18 @@ class EngineConfig:
 
 
 class GestureEngine:
-    def __init__(self, config: EngineConfig, on_command=None, on_event=None, on_pointer=None):
+    def __init__(self, config: EngineConfig, on_command=None, on_event=None, on_pointer=None,
+                 on_pointer_lost=None):
         self.config = config
         self.on_command = on_command or (lambda command, payload: None)
         self.on_event = on_event or (lambda event: None)
         # Called at full frame rate while pointer/annotation mode is active so the
         # on-screen pointer tracks the hand smoothly (telemetry is rate-limited).
         self.on_pointer = on_pointer or (lambda x, y, mode: None)
+        # Called once when the hand that was drawing leaves the frame, so the pen
+        # is lifted instead of leaving PowerPoint in a drag that follows the mouse
+        # around the slide.
+        self.on_pointer_lost = on_pointer_lost or (lambda: None)
 
         self.mapper = GestureMapper(config.preferences)
         # Personalized when the user has a model and has opted in; the geometric
@@ -86,7 +98,13 @@ class GestureEngine:
             enabled=bool(self.recognizer_info.get("personalized")),
         )
         self.collector = GestureSampleCollector()
-        self.debouncer = GestureDebouncer(config.debounce_frames, config.cooldown_ms)
+        self.debouncer = GestureDebouncer(
+            config.debounce_frames, config.cooldown_ms, config.release_frames,
+        )
+        # Smooths the recognizer's per-frame output before it reaches the mapper.
+        # Runs for both recognizers: the geometric one confuses INDEX_UP with
+        # INDEX_MIDDLE_UP at the extension threshold just as readily as a model does.
+        self.stabilizer = GestureStabilizer(config.stabilizer_window)
 
         self._thread: threading.Thread | None = None
         self._stop = threading.Event()
@@ -105,6 +123,7 @@ class GestureEngine:
         self._last_hand_seen = 0.0
         self._last_telemetry = 0.0
         self._gated = 0
+        self._pointer_streaming = False
 
     # --- lifecycle -----------------------------------------------------------
     def start(self) -> None:
@@ -116,16 +135,26 @@ class GestureEngine:
         self.commands_fired = 0
         self.gesture_counts = {}
         self.debouncer.reset()
+        self.stabilizer.reset()
         self.mode = MODE_IDLE
+        self._pointer_streaming = False
         self._thread = threading.Thread(target=self._run, name="visionx-cv-engine", daemon=True)
         self._thread.start()
 
     def stop(self) -> None:
         self._stop.set()
+        # Drop out of pointer/annotation mode *before* joining. The join has a
+        # timeout, so the camera thread may still run a frame or two after it
+        # returns - and in IDLE mode that frame releases the pointer instead of
+        # calling pen_down() again after the caller already lifted it.
+        self.mode = MODE_IDLE
         thread = self._thread
         if thread and thread.is_alive():
             thread.join(timeout=4.0)
         self._thread = None
+        # Never end a session mid-stroke: the pen must be lifted before the
+        # controller goes away, or the mouse button stays held on the desktop.
+        self._release_pointer()
         self.state = STATE_STOPPED
         self.mode = MODE_IDLE
         self.started_at = None
@@ -142,6 +171,9 @@ class GestureEngine:
         self.config.preferences = preferences
         self.mapper.load(preferences)
         self.debouncer.reset()
+        # A remap mid-session must not let frames recorded under the old bindings
+        # vote for a command under the new ones.
+        self.stabilizer.reset()
 
     def recognizer_stats(self) -> dict:
         stats = getattr(self.recognizer, "stats", None)
@@ -166,6 +198,9 @@ class GestureEngine:
             "uptime": round(time.time() - self.started_at, 1) if self.started_at else 0,
             "recognizer": self.recognizer_info,
             "intentGate": self.intent_gate.describe(),
+            "stabilizer": self.stabilizer.describe(),
+            "releaseFrames": self.debouncer.release_frames,
+            "cooldownMs": self.config.cooldown_ms,
             "gatedFrames": self._gated,
             "enrollment": self.collector.status(),
             "mode_kind": "ENROLLMENT" if self.config.enrollment_mode else "SESSION",
@@ -253,24 +288,22 @@ class GestureEngine:
                     last_capture_count = capture.accepted
                     self._emit({"type": "enrollment", **capture.as_dict()})
 
-                # The intent gate turns an ambiguous frame into the neutral state the
-                # debouncer already handles. It never invents a command.
-                result, gate_reason = self.intent_gate.apply(result)
-                if gate_reason == REJECT_AMBIGUOUS:
-                    self._gated += 1
+                raw = result
+                result, gate_reason, decision = self.decide(result)
 
-                command = self.mapper.map(result.gesture) if result.hand_detected else None
-                decision = self.debouncer.submit(
-                    result.gesture,
-                    command,
-                    result.confidence,
-                    self.config.confidence_threshold,
-                )
-
-                if result.hand_detected:
+                if raw.hand_detected:
                     self._last_hand_seen = loop_start
-                multimodal_context.update_hand(result.hand_detected)
+                multimodal_context.update_hand(raw.hand_detected)
 
+                # The stabilised result carries the *live* fingertip whenever the
+                # frame had one, and the last known fingertip when it did not - so
+                # this adds no lag while the hand is visible, and does not blank
+                # the pointer for a single dropped frame.
+                #
+                # Using `raw.pointer` here instead looks equivalent and is not: one
+                # lost MediaPipe frame mid-stroke made `pointer` None, which took
+                # the `_release_pointer` branch below, lifted the pen, and split
+                # the stroke into two fragments with a gap between them.
                 pointer = self._track_pointer(result.pointer)
                 if pointer is not None:
                     # Published for multimodal commands ("highlight this") to resolve
@@ -281,10 +314,15 @@ class GestureEngine:
                     self._handle_command(decision.command, pointer)
 
                 if pointer is not None and self.mode != MODE_IDLE:
+                    self._pointer_streaming = True
                     try:
                         self.on_pointer(pointer[0], pointer[1], self.mode)
                     except Exception:  # noqa: BLE001
                         logger.debug("Pointer subscriber raised", exc_info=True)
+                elif self._pointer_streaming:
+                    # The hand left the frame, or the mode went idle, while a stroke
+                    # was in progress. Lift the pen exactly once.
+                    self._release_pointer()
 
                 # --- preview frame (display only) --------------------------
                 if hand is not None:
@@ -297,10 +335,16 @@ class GestureEngine:
                     self._last_telemetry = now
                     self._emit({
                         "type": "telemetry",
+                        # `gesture` is the STABILISED pose - what VisionX actually
+                        # believes and acts on. Publishing the raw per-frame
+                        # prediction here is what made the on-screen action label
+                        # flicker between poses several times a second.
                         "gesture": result.gesture,
+                        "rawGesture": raw.gesture,
                         "confidence": round(result.confidence, 3),
                         "status": decision.status,
                         "progress": round(decision.progress, 2),
+                        "releaseProgress": round(decision.release_progress, 2),
                         "command": decision.command,
                         "executed": decision.fire,
                         "mode": self.mode,
@@ -335,28 +379,130 @@ class GestureEngine:
             self._emit({"type": "state", **self.snapshot()})
             logger.info("Gesture engine stopped")
 
+    # --- per-frame decision --------------------------------------------------
+    def decide(self, result):
+        """One frame's journey from a raw classification to a fire/hold decision.
+
+        Split out of the camera loop so the part that decides whether a command
+        happens can be driven directly by tests, with no webcam and no thread. The
+        loop calls exactly this, so a test that drives it is testing the shipped
+        path rather than a re-implementation of it.
+
+        Three filters, in this order, each doing one thing:
+
+            intent gate   this frame is ambiguous            -> neutral
+            stabilizer    this frame disagrees with its neighbours -> outvoted
+            debouncer     this pose has not been held / has not been released
+        """
+        # The intent gate turns an ambiguous frame into the neutral state the
+        # debouncer already handles. It never invents a command.
+        gated, gate_reason = self.intent_gate.apply(result)
+        if gate_reason == REJECT_AMBIGUOUS:
+            self._gated += 1
+
+        # Then smooth over time. One stray frame - a middle finger that dipped
+        # below the extension threshold, a hand lost for a frame - can no longer
+        # reach the mapper, so INDEX+MIDDLE stays the pointer rather than
+        # flickering into the pen.
+        stable = self.stabilizer.update(gated)
+
+        command = self.mapper.map(stable.gesture) if stable.hand_detected else None
+        decision = self.debouncer.submit(
+            stable.gesture,
+            command,
+            stable.confidence,
+            self.config.confidence_threshold,
+        )
+        return stable, gate_reason, decision
+
     # --- internals -----------------------------------------------------------
     def _handle_command(self, command: str, pointer) -> None:
         self.commands_fired += 1
         self.gesture_counts[command] = self.gesture_counts.get(command, 0) + 1
 
+        # The engine and the dispatcher both used to toggle a mode independently,
+        # from the same event, and could therefore end up disagreeing about which
+        # way the toggle went - the pointer "on" here and "off" there. The engine
+        # decides once and sends the decision as an explicit `state` parameter, so
+        # the dispatcher sets rather than guesses.
+        parameters: dict = {}
+
         if command == VIRTUAL_POINTER:
-            self.set_mode(MODE_IDLE if self.mode == MODE_POINTER else MODE_POINTER)
+            target = self.mode != MODE_POINTER
+            if not target:
+                self._release_pointer()
+            self.set_mode(MODE_POINTER if target else MODE_IDLE)
+            parameters["state"] = target
         elif command == ANNOTATION_MODE:
-            self.set_mode(MODE_IDLE if self.mode == MODE_ANNOTATE else MODE_ANNOTATE)
+            target = self.mode != MODE_ANNOTATE
+            if not target:
+                self._release_pointer()
+            self.set_mode(MODE_ANNOTATE if target else MODE_IDLE)
+            parameters["state"] = target
         elif command == CLEAR_ANNOTATION:
-            self.set_mode(MODE_IDLE)
+            # Erasing ink lifts the pen for the stroke in progress but is not a
+            # mode change: PowerPoint stays in whatever pointer mode it was in, so
+            # the presenter can carry on drawing on a now-clean slide.
+            self._release_pointer()
 
         payload = {
             "mode": self.mode,
+            "parameters": parameters,
             "pointer": {"x": pointer[0], "y": pointer[1]} if pointer else None,
             "timestamp": time.time(),
         }
         try:
-            self.on_command(command, payload)
+            record = self.on_command(command, payload)
         except Exception as exc:  # noqa: BLE001 - a bad dispatch must not kill the loop
             logger.exception("Command dispatch failed for %s: %s", command, exc)
             self._emit({"type": "command_error", "command": command, "message": str(exc)})
+            return
+
+        # Adopt what actually happened. A command can be recognised and still not
+        # delivered - the pen is refused when PowerPoint is not presenting - and
+        # the engine must not go on believing it is in a mode PowerPoint was never
+        # put into. Without this the UI shows ANNOTATE while nothing draws.
+        self.sync_mode(record)
+
+    def sync_mode(self, record) -> None:
+        """Reconcile the engine's mode with the dispatcher's reported state.
+
+        Called after *every* dispatch, from any modality - not just gestures. A
+        voice command or the on-screen control bar can turn the pointer off
+        underneath a running engine, and if the engine did not hear about it, its
+        stale mode would invert the next gesture: the presenter makes the pointer
+        gesture expecting it on, the engine computes "toggle off from POINTER",
+        and nothing appears to happen.
+        """
+        if not isinstance(record, dict):
+            return   # a subscriber that reports nothing leaves the mode as decided
+        pointer = record.get("pointerActive")
+        annotation = record.get("annotationActive")
+        if pointer is None and annotation is None:
+            return
+
+        if annotation:
+            actual = MODE_ANNOTATE
+        elif pointer:
+            actual = MODE_POINTER
+        else:
+            actual = MODE_IDLE
+
+        if actual != self.mode:
+            logger.debug("Engine mode corrected from %s to %s", self.mode, actual)
+            if actual == MODE_IDLE:
+                self._release_pointer()
+            self.set_mode(actual)
+
+    def _release_pointer(self) -> None:
+        """Tell the subscriber the pointer stream has ended. Idempotent."""
+        if not self._pointer_streaming:
+            return
+        self._pointer_streaming = False
+        try:
+            self.on_pointer_lost()
+        except Exception:  # noqa: BLE001 - lifting the pen must not kill the loop
+            logger.debug("Pointer-lost subscriber raised", exc_info=True)
 
     def _track_pointer(self, pointer):
         """Exponentially smooth the fingertip so the on-screen dot does not jitter."""

@@ -76,6 +76,65 @@ def confirm():
     )
 
 
+# --- continuous listening -----------------------------------------------------
+@voice_bp.post("/stream")
+@require_auth
+def stream_segment():
+    """One segment from the always-on microphone.
+
+    The browser posts short segments continuously; each is transcribed and offered
+    to the wake-word machine. Most segments are ordinary speech and do nothing at
+    all - only "Vision ... OK" reaches the trained intent model.
+
+    Like /utterance, the audio is transcribed and discarded. Continuous listening
+    is not continuous recording.
+    """
+    audio = request.files.get("audio")
+    if audio is None:
+        raise ValidationError("No audio was uploaded.")
+
+    execute = str(request.form.get("execute", "1")).lower() not in ("0", "false", "no")
+    session_id = request.form.get("sessionId") or None
+
+    return success(
+        voice_service.stream_segment(
+            g.user_id, audio.read(), audio.filename or "segment.webm",
+            session_id=session_id, execute=execute,
+        ),
+        "Segment processed.",
+    )
+
+
+@voice_bp.post("/stream/text")
+@require_auth
+def stream_text():
+    """Text-mode continuous listening - the typed fallback, and what tests drive."""
+    payload = request.get_json(silent=True) or {}
+    require_fields(payload, ["text"])
+    return success(
+        voice_service.observe_segment(
+            g.user_id, str(payload["text"]),
+            session_id=payload.get("sessionId"),
+            execute=bool(payload.get("execute", True)),
+        ),
+        "Segment processed.",
+    )
+
+
+@voice_bp.get("/wake")
+@require_auth
+def wake_status():
+    """Where the wake-word machine currently is: listening, or mid-command."""
+    return success(voice_service.wake_status(g.user_id))
+
+
+@voice_bp.post("/wake/reset")
+@require_auth
+def reset_wake():
+    """Abandon a half-captured command and go back to waiting for 'Vision'."""
+    return success(voice_service.reset_wake_session(g.user_id), "Listening reset.")
+
+
 @voice_bp.get("/history")
 @require_auth
 def history():

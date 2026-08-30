@@ -14,6 +14,7 @@ user has left transcript retention on.
 """
 
 import logging
+import threading
 import time
 from datetime import datetime, timezone
 
@@ -36,10 +37,55 @@ from voice_assistant.intent.interpreter import (
 )
 from voice_assistant.speech.base import SpeechRecognizerError, SpeechUnavailableError
 from voice_assistant.speech.factory import get_speech_recognizer
+from voice_assistant.wake import (
+    ACTION_EXECUTE,
+    ACTION_IDLE,
+    DEFAULT_TERMINATORS,
+    DEFAULT_WAKE_WORDS,
+    WakeWordSession,
+)
 
 logger = logging.getLogger(__name__)
 
 MAX_TRANSCRIPT_CHARS = 400
+
+# --- continuous listening -----------------------------------------------------
+# One wake-word state machine per user. The browser streams short segments of
+# audio continuously; each one is transcribed by the *existing* Whisper backend
+# and offered to that user's state machine, which decides whether anything in it
+# was addressed to VisionX. Only then does the trained intent model see it.
+_wake_lock = threading.Lock()
+_wake_sessions: dict[str, WakeWordSession] = {}
+
+
+def wake_session(user_id: str) -> WakeWordSession:
+    with _wake_lock:
+        session = _wake_sessions.get(user_id)
+        if session is None:
+            session = WakeWordSession()
+            _wake_sessions[user_id] = session
+        return session
+
+
+def reset_wake_session(user_id: str) -> dict:
+    """Drop a half-captured command and go back to waiting for the wake word."""
+    session = wake_session(user_id)
+    session.reset()
+    return session.snapshot()
+
+
+def clear_wake_sessions() -> None:
+    """Forget every user's listening state. Used when a session ends, and by tests."""
+    with _wake_lock:
+        _wake_sessions.clear()
+
+
+def wake_status(user_id: str) -> dict:
+    return {
+        **wake_session(user_id).snapshot(),
+        "wakeWord": DEFAULT_WAKE_WORDS[0],
+        "terminator": DEFAULT_TERMINATORS[0],
+    }
 
 
 class VoiceUnavailableError(ApiError):
@@ -106,6 +152,15 @@ def status(user_id: str) -> dict:
         "thresholds": {"execute": thresholds.execute, "confirm": thresholds.confirm},
         "transcriptRetention": bool(settings_doc.get("voiceTranscriptRetention")),
         "sessionActive": bool(engine_service.session and engine_service.dispatcher),
+        # Continuous listening: the browser streams segments and the server keeps
+        # the wake state, so the presenter never has to touch the web app.
+        "continuous": {
+            "supported": True,
+            "wakeWord": DEFAULT_WAKE_WORDS[0],
+            "terminator": DEFAULT_TERMINATORS[0],
+            "example": f"{DEFAULT_WAKE_WORDS[0]} go to next slide {DEFAULT_TERMINATORS[0]}",
+            **wake_session(user_id).snapshot(),
+        },
     }
 
 
@@ -218,6 +273,82 @@ def transcribe_and_interpret(user_id: str, audio: bytes, filename: str,
     started = time.perf_counter()
     speech = transcribe(user_id, audio, filename)
     return interpret(
+        user_id, speech["text"], session_id=session_id, execute=execute,
+        speech=speech, latency_ms=(time.perf_counter() - started) * 1000.0,
+    )
+
+
+# --- continuous listening -----------------------------------------------------
+def observe_segment(user_id: str, transcript: str, session_id: str | None = None,
+                    execute: bool = True, speech: dict | None = None,
+                    latency_ms: float | None = None) -> dict:
+    """One segment of continuously-listened speech.
+
+    This is the whole of the "Vision <command> OK" feature on the server:
+
+        transcript -> WakeWordSession -> (only if a command was completed)
+                   -> the existing interpret() -> the existing dispatcher
+
+    Ordinary speech never reaches the intent model at all, so a presenter talking
+    normally cannot move a slide. Once a command completes, the *unchanged*
+    trained pipeline - TF-IDF, logistic regression, confidence bands, parameter
+    extraction - decides what it means, exactly as push-to-talk does.
+    """
+    _require_enabled(user_id)
+    session = wake_session(user_id)
+    outcome = session.observe(transcript or "")
+
+    payload: dict = {
+        "wake": outcome.as_dict(),
+        "listening": True,
+        "executed": False,
+        "speech": speech,
+        "transcript": outcome.heard,
+    }
+
+    if not outcome.commands:
+        if outcome.action == ACTION_EXECUTE:
+            # "Vision ... OK" with nothing in between. Nothing to interpret, and
+            # the machine is already back to listening.
+            payload["message"] = "I heard the wake word but no command."
+        # Publish the listening state so the UI can show ARMED / CAPTURING without
+        # the presenter touching anything. Nothing is dispatched and nothing is
+        # logged: this is not a command yet.
+        if outcome.action != ACTION_IDLE:
+            bus.publish({"type": "voice_wake", **payload})
+        return payload
+
+    # A single segment can complete more than one command - "…slide five OK,
+    # Vision next slide OK" is one 3-second recording. Run them in the order they
+    # were spoken; running only the last would silently drop the first.
+    decisions = [
+        interpret(user_id, command, session_id=session_id, execute=execute,
+                  speech=speech, latency_ms=latency_ms)
+        for command in outcome.commands
+    ]
+
+    # The last decision is the headline (it is what the UI shows); the rest are
+    # reported alongside so nothing that ran is invisible.
+    payload.update(decisions[-1])
+    payload["wake"] = outcome.as_dict()
+    payload["command"] = decisions[-1].get("command")
+    payload["executed"] = any(d.get("executed") for d in decisions)
+    if len(decisions) > 1:
+        payload["decisions"] = decisions
+    return payload
+
+
+def stream_segment(user_id: str, audio: bytes, filename: str = "segment.webm",
+                   session_id: str | None = None, execute: bool = True) -> dict:
+    """Transcribe one continuously-captured segment and run it through the machine.
+
+    Audio is transcribed and discarded, exactly as in push-to-talk. Continuous
+    listening does not mean continuous recording: nothing is written to disk and
+    nothing but the command-level telemetry reaches MongoDB.
+    """
+    started = time.perf_counter()
+    speech = transcribe(user_id, audio, filename)
+    return observe_segment(
         user_id, speech["text"], session_id=session_id, execute=execute,
         speech=speech, latency_ms=(time.perf_counter() - started) * 1000.0,
     )

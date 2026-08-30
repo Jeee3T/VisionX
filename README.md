@@ -11,23 +11,24 @@ real key presses.
 Both modalities converge on **one** command pipeline. Neither can reach PowerPoint any other way.
 
 ```
-  webcam ─► OpenCV ─► MediaPipe ─► recognizer ─► intent gate ─┐
-                                   (geometric OR              │
-                                    personalized MLP)         │
-                                                              ├─► debouncer ─► gesture mapper ─┐
-                                                              │                                │
-                                                              ┘                                ▼
-                                                                                        CommandIntent
-                                                                                       {source, intent,
-   microphone ─► Whisper (STT) ─► intent classifier ─► parameter extraction ─────────►   parameters,
-                 pretrained       VisionX-trained       confidence gate                  confidence}
-                                                                                                │
-                                                                                                ▼
-                                                                                       CommandDispatcher
-                                                                                                │
-                                                                                                ▼
-                                                                                    PowerPointController
-                                                                                        (PyAutoGUI)
+  webcam ─► OpenCV ─► MediaPipe ─► recognizer ─► intent gate ─► stabilizer ─┐
+                                   (geometric OR         per-frame  5-frame  │
+                                    personalized MLP)     ambiguity   vote   │
+                                                                             ├─► debouncer ─► mapper ─┐
+                                                                             │   hold · release ·     │
+                                                                             ┘   cooldown             ▼
+                                                                                              CommandIntent
+                                                                                             {source, intent,
+   microphone ─► Whisper (STT) ─► wake word ─► intent classifier ─► parameters ───────────►    parameters,
+    continuous    pretrained     "Vision…OK"   VisionX-trained    confidence gate              confidence}
+                                                                                                      │
+                                                                                                      ▼
+                                                                                             CommandDispatcher
+                                                                                                      │
+                                                                                                      ▼
+                                                                                          PowerPointController
+                                                                                         COM ─┬─ PyAutoGUI
+                                                                                              └─ slideshow guard
                      ↕
          Flask REST API ↔ MongoDB ↔ React frontend (SSE live telemetry)
 ```
@@ -38,7 +39,7 @@ Both modalities converge on **one** command pipeline. Neither can reach PowerPoi
 | --- | --- | --- |
 | **Pretrained, third-party** | MediaPipe hand landmarker · Whisper speech-to-text | `computer_vision/hand_detection/` · `voice_assistant/speech/` |
 | **Trained by VisionX** | personalized gesture MLP · voice intent classifier | `computer_vision/ml/` · `voice_assistant/intent/` |
-| **Rule-based** | geometric recognizer · debouncer · intent gate · parameter extraction · dispatcher | `computer_vision/gesture_recognition/` · `computer_vision/ml/intent_gate.py` · `voice_assistant/intent/parameters.py` · `presentation_controller/` |
+| **Rule-based** | geometric recognizer · stabilizer · debouncer · intent gate · wake word · parameter extraction · dispatcher · slideshow guard | `computer_vision/gesture_recognition/` · `computer_vision/ml/intent_gate.py` · `voice_assistant/wake/` · `voice_assistant/intent/parameters.py` · `presentation_controller/` |
 
 ---
 
@@ -48,9 +49,9 @@ Both modalities converge on **one** command pipeline. Neither can reach PowerPoi
 | --------------------------- | ------------------- | --------------------------------------- |
 | Pinky only                  | `NEXT_SLIDE`        | Right Arrow → next slide                |
 | Thumb only                  | `PREVIOUS_SLIDE`    | Left Arrow → previous slide             |
-| Index + middle              | `VIRTUAL_POINTER`   | Toggles the laser pointer, cursor follows your fingertip |
-| Index only                  | `ANNOTATION_MODE`   | Toggles the pen; your fingertip draws   |
-| Index + middle + ring       | `CLEAR_ANNOTATION`  | Erases the ink on the current slide     |
+| Index + middle              | `VIRTUAL_POINTER`   | Toggles the pointer; the cursor follows your fingertip. **Never** sends `Ctrl+P` |
+| Index only                  | `ANNOTATION_MODE`   | Toggles the pen; your fingertip draws (a real drag, not just a move) |
+| Index + middle + ring       | `CLEAR_ANNOTATION`  | Erases the ink on the current slide, leaving the pen as it was |
 
 Poses are **not hardcoded to commands** — every binding lives in the user's `GesturePreferences`
 document and can be reassigned in the UI. A saved remap applies to a running session immediately.
@@ -68,15 +69,18 @@ them, and every one is a real PowerPoint shortcut:
 
 ### Voice
 
-Hold the microphone button, say the command, release:
+Turn the microphone on once at the start of the talk. From then on, say **"Vision"**, the command,
+then **"OK"** — with no interaction with the web app at any point:
 
-> "next slide" · "go back two slides" · "go to slide seven" · "show me slide ten" ·
-> "back to the beginning" · "black screen" · "turn on the pen" · "erase the ink" ·
-> "start the presentation"
+> "Vision **next slide** OK" · "Vision **go back two slides** OK" · "Vision **go to slide seven** OK" ·
+> "Vision **back to the beginning** OK" · "Vision **black screen** OK" · "Vision **turn on the pen** OK" ·
+> "Vision **erase the ink** OK" · "Vision **start the presentation** OK"
 
-Anything else — "as you can see on this slide, revenue grew twelve percent" — is classified as
-**not a command** and ignored. That is the whole difficulty of the problem, and it is what §6
-is about.
+Anything you say that is not framed that way — "as you can see on this slide, revenue grew twelve
+percent", or even "next slide please" — never reaches the intent model. And a phrase that *is*
+framed that way still has to clear the classifier's confidence gate, so a wake word picked up by
+accident cannot move the deck either. That is the whole difficulty of the problem, and it is what
+§6 and §7 are about.
 
 ---
 
@@ -90,25 +94,57 @@ is about.
 
 ### Platform support
 
-**Windows is the supported and verified target.** VisionX drives PowerPoint by sending real key
-presses through PyAutoGUI, and the key codes in `presentation_controller/powerpoint.py` are the
-**Windows** PowerPoint shortcuts. They are not the same on macOS, so the table below is honest about
-what does and does not work off a fresh checkout.
+**Windows is the supported and verified target**, and VisionX is built as a Windows application
+rather than a cross-platform one that happens to run there. On Windows it does not merely send
+keystrokes at PowerPoint — it **talks to PowerPoint** through COM
+(`presentation_controller/windows.py`), and falls back to keystrokes only where it must.
 
-| Command | Key sent | Windows | macOS | Linux |
+| Command | On Windows | Keystroke fallback | macOS | Linux |
 | --- | --- | --- | --- | --- |
-| `NEXT_SLIDE` | `Right` | works | works | X11 only |
-| `PREVIOUS_SLIDE` | `Left` | works | works | X11 only |
-| `GO_TO_SLIDE` | digits + `Enter` | works | works | X11 only |
-| `FIRST_SLIDE` | `Home` | works | needs `Fn`+`Left`; most Mac keyboards have no `Home` | X11 only |
-| `LAST_SLIDE` | `End` | works | needs `Fn`+`Right` | X11 only |
-| `START_PRESENTATION` | `F5` | works | **does not work** — macOS uses `Cmd`+`Shift`+`Return` | X11 only |
-| `END_PRESENTATION` | `Esc` | works | works | X11 only |
-| `BLACKOUT` / `WHITEOUT` | `B` / `W` | works | works | X11 only |
-| `VIRTUAL_POINTER` | `Ctrl`+`L` | works | **does not work** — macOS uses `Cmd`+`L` | X11 only |
-| `ANNOTATION_MODE` | `Ctrl`+`P` | works | **does not work** — macOS uses `Cmd`+`P` | X11 only |
-| pointer/pen off | `Ctrl`+`A` | works | **does not work** — macOS uses `Cmd`+`A` | X11 only |
-| `CLEAR_ANNOTATION` | `E` | works | **does not work** — macOS uses `Shift`+`E` | X11 only |
+| `NEXT_SLIDE` | `View.Next()` | `Right` | works | X11 only |
+| `PREVIOUS_SLIDE` | `View.Previous()` | `Left` | works | X11 only |
+| `GO_TO_SLIDE` | `View.GotoSlide(n)` | digits + `Enter` | works | X11 only |
+| `FIRST_SLIDE` | `View.GotoSlide(1)` | `Home` | needs `Fn`+`Left` | X11 only |
+| `LAST_SLIDE` | `View.GotoSlide(count)` | `End` | needs `Fn`+`Right` | X11 only |
+| `START_PRESENTATION` | `F5` | `F5` | **no** — macOS uses `Cmd`+`Shift`+`Return` | X11 only |
+| `END_PRESENTATION` | `Esc` | `Esc` | works | X11 only |
+| `BLACKOUT` / `WHITEOUT` | `B` / `W` | `B` / `W` | works | X11 only |
+| `VIRTUAL_POINTER` | `PointerType = Arrow` + real mouse | `Ctrl`+`L` | **no** — macOS uses `Cmd`+`L` | X11 only |
+| `ANNOTATION_MODE` | `PointerType = Pen` | `Ctrl`+`P` **(guarded)** | **no** — macOS uses `Cmd`+`P` | X11 only |
+| drawing | mouse button held while moving | same | same | X11 only |
+| pointer/pen off | `PointerType = Arrow` | `Ctrl`+`A` | **no** — macOS uses `Cmd`+`A` | X11 only |
+| `CLEAR_ANNOTATION` | `View.EraseDrawing()` | `E` **(guarded)** | **no** — macOS uses `Shift`+`E` | X11 only |
+
+**Why the COM path exists.** PowerPoint's slideshow shortcuts are not merely useless outside a
+slideshow — one of them is actively dangerous:
+
+```
+Ctrl+P   in a slideshow            ->  pen
+         on an ordinary PPT window ->  PRINT DIALOG
+```
+
+Sending it blind is what put the Print dialog on screen mid-talk. VisionX now asks PowerPoint
+whether a slideshow is running before it arms the pen, and there are three answers, each handled
+differently:
+
+| Probe result | Meaning | What VisionX does |
+| --- | --- | --- |
+| `CONFIRMED` | Windows, PowerPoint is presenting | set the pen (COM; keystroke only if COM is unavailable) |
+| `DENIED` | Windows, PowerPoint is **not** presenting | **refuse** with a message naming the reason — no `Ctrl+P` |
+| `UNKNOWN` | not Windows, or no COM binding | send `Ctrl+P` — the historical behaviour, since there is no evidence of danger |
+
+Distinguishing `DENIED` from `UNKNOWN` is the whole fix: refusing everywhere would break every
+non-Windows setup, and allowing everywhere is the bug.
+
+Two more Windows specifics:
+
+- **Per-monitor DPI awareness** is enabled at start-up (`enable_dpi_awareness()`), before PyAutoGUI
+  caches the screen size. Every laptop ships scaled to 125–150%, and without this the virtual
+  pointer lands at roughly 80% of where the presenter is pointing.
+- **A small inter-key pause** (12 ms). PowerPoint's slideshow window silently drops keystrokes
+  delivered back-to-back with no gap at all.
+
+`GET /api/health` reports the slideshow probe, so a presenter can check before they start.
 
 Everything *except* the key-press layer is platform-neutral: MediaPipe detection, canonicalization,
 both recognizers, the debouncer, the intent gate, speech-to-text, the intent classifier, parameter
@@ -212,8 +248,10 @@ Two optional detours off that path:
 
 - **Gesture settings → Train my gestures** enrols your hands and trains a personalized model
   (§6). Everything above keeps working identically whether or not you do this.
-- **Voice** turns on push-to-talk in the session screen (§7). A voice command travels the exact
-  same dispatcher as a gesture, so it lands in the same history and the same analytics.
+- **Voice** turns on continuous listening in the session screen (§7): say
+  "Vision <command> OK" at any point and it runs, with no interaction with the web app. A voice
+  command travels the exact same dispatcher as a gesture, so it lands in the same history and the
+  same analytics.
 
 Keyboard fallback during a session: `←` `→` `P` `A` `E` go through the exact same dispatcher.
 
@@ -221,15 +259,38 @@ Keyboard fallback during a session: `←` `→` `P` `A` `E` go through the exact
 
 ## 5. Why gestures do not misfire
 
-A command fires only when **all three** conditions hold (`computer_vision/gesture_recognition/debouncer.py`):
+A command fires only when **all four** conditions hold:
+
+0. **Temporal smoothing** (`computer_vision/gesture_recognition/stabilizer.py`) — the pose that
+   reaches the command mapper is a plurality vote over the last 5 frames, not the latest frame's
+   classification. Two poses in the library differ by one bit — `INDEX_UP` (the pen) and
+   `INDEX_MIDDLE_UP` (the pointer) — so a middle finger that dips below the extension threshold for
+   a frame used to change which command you were giving. It cannot now: one or two stray frames are
+   outvoted. When no pose commands a plurality the stabilizer reports `UNKNOWN`, which is the
+   neutral state the debouncer already handles.
+
+Then, in `computer_vision/gesture_recognition/debouncer.py`:
 
 1. **Confidence gate** — the pose confidence clears the session threshold.
 2. **Temporal persistence** — the same command survives N consecutive frames (default 6).
-3. **Neutral state between repeats** — after a command fires, the same command cannot fire again until
-   a neutral frame occurs: no hand, an unrecognised pose, or any pose you have left unbound. This is
-   what stops one flick of the hand from skipping three slides.
+3. **Sustained neutral state between repeats** — after a command fires, the same command cannot fire
+   again until neutrality has been *held* for `release_frames` consecutive frames. The default is the
+   **full** persistence requirement — releasing a gesture takes as long as making one — because the
+   stabilizer needs a few frames to swing over to "no hand", so N dropped frames already produce
+   close to N neutral ones. Half of it left a ~66 ms margin, and a 100 ms MediaPipe dropout mid-hold
+   still advanced a second slide. Neutral means no hand, an unrecognised pose, or any pose you have
+   left unbound.
 
 A cooldown (default 900 ms) sits on top as a final guard.
+
+> **Why neutrality has to be held, not merely observed.** A single neutral frame used to re-arm the
+> repeat. That sounds harmless and is not: a held gesture does not produce a clean run of identical
+> frames — MediaPipe loses the hand for a frame, the model emits a runner-up class, the intent gate
+> neutralises an ambiguous frame. Any one of those unlocked the repeat, the streak rebuilt in a
+> fifth of a second, and the command fired again. Measured on a stream with one dropped frame in
+> twelve, a single held gesture produced **30 slide advances in 30 seconds**; with the hold rule it
+> produces **one**. `tests/test_gesture_stability.py::test_the_neutral_hold_rule_is_what_stops_the_deck_walking`
+> asserts both numbers against the same input, so the regression cannot come back quietly.
 
 With a personalized model there is a fourth: an **intent gate** (`computer_vision/ml/intent_gate.py`)
 rejects a frame whose top two classes are within 0.15 probability of each other. A hand the model
@@ -347,8 +408,9 @@ input. A corrupt or version-mismatched model is logged once and treated exactly 
 Optional, opt-in, per user. Off by default; turning it off changes nothing about gestures.
 
 ```
-microphone ─► MediaRecorder (push-to-talk) ─► POST /api/voice/utterance
+microphone ─► MediaRecorder (continuous, 3 s segments) ─► POST /api/voice/stream
            ─► Whisper (local, pretrained)   ─► transcript
+           ─► wake-word machine ("Vision" … "OK")  ─► a command, or nothing at all
            ─► intent classifier (VisionX-trained) ─► intent + probability
            ─► parameter extraction (rule-based)   ─► slideNumber / count
            ─► confidence band ─► CommandIntent ─► the existing CommandDispatcher
@@ -356,6 +418,46 @@ microphone ─► MediaRecorder (push-to-talk) ─► POST /api/voice/utterance
 
 The voice layer contains **no PowerPoint logic**. It cannot: the only way it can affect a slideshow
 is by handing a `CommandIntent` to the same dispatcher the gesture engine uses.
+
+### Continuous listening — "Vision … OK"
+
+The presenter turns the microphone on once, at the start of the talk, and never touches the web app
+again:
+
+```
+[Listening] ──"Vision"──► [Command mode] ──"go to next slide"──► "OK" ──► NEXT_SLIDE
+     ▲                                                                        │
+     └────────────────────────────────────────────────────────────────────────┘
+```
+
+`voice_assistant/wake/wake_word.py` is a **pure-text state machine**: transcripts in, decisions out,
+no audio and no model. It decides *when* there is something to classify; the trained model still
+decides what it means, with the same confidence bands as before. Nothing about the trained pipeline
+changed — continuous listening was built around it.
+
+- Both boundaries may arrive in one breath (`"Vision go to next slide OK"`) or across several
+  recorder segments (`"Vision"` / `"go to next slide"` / `"OK"`). Where the recorder's timer happens
+  to fall does not change what a command means.
+- Ordinary speech — including `"next slide please"` and `"ok, so the last slide showed…"` — never
+  reaches the intent model at all.
+- The wake word must be a whole word, and must be **addressed** rather than merely used. Two guards,
+  because getting this wrong is how a talk drives its own deck:
+  - No ordinary English word is a wake word, however close it sounds. *Envision* and *provision* were
+    accepted at first, and "we need to **provision** more servers and then move to the next slide,
+    okay" then executed `NEXT_SLIDE` at 0.85 confidence. The confidence gate cannot help there — the
+    captured words genuinely are a command.
+  - A wake word directly after a determiner or possessive is part of a sentence, not a summons, so
+    "our **vision** going forward…" and "the **vision** is simple…" are ignored. Genuine
+    mis-transcriptions (*visions*, *vision x*, *visionx*) still arm it.
+- A captured command is capped at 10 words. Every command VisionX can run fits in six, and a run-on
+  capture is far more likely to be ordinary speech that followed a stray wake word.
+- A capture that never ends times out after 12 s, so an accidental wake word cannot swallow the rest
+  of the talk.
+- **Continuous listening is not continuous recording.** Each segment is transcribed in memory and
+  discarded; silent segments are never uploaded at all.
+
+Push-to-talk (`POST /api/voice/utterance`) still exists and is unchanged — it is what the Voice
+Assistant settings screen uses to test a phrase.
 
 ### Speech-to-text — pretrained, not trained here
 
@@ -368,8 +470,8 @@ VisionX does not train a speech recogniser. `voice_assistant/speech/base.py` def
 | `NullSpeechRecognizer` | neither installed — fails with install instructions, never a stack trace |
 
 Audio never leaves the machine, which is the natural arrangement here: the backend already runs on
-the presenter's own computer, because it is that computer's keyboard it drives. Recording is
-push-to-talk and capped at 8 seconds — the microphone is never quietly listening through a talk.
+the presenter's own computer, because it is that computer's keyboard it drives. Segments are
+transcribed in memory and discarded; a segment below the silence threshold is never uploaded.
 
 ### Intent classifier — trained by VisionX
 
@@ -574,7 +676,7 @@ Personalization is off by default and gated on **explicit, separate consent**.
 | | |
 | --- | --- |
 | **Hand landmarks** | Coordinates, never images. No frame is ever written to disk. Collection requires `gestureLearningConsent`; turning it off stops collection immediately (it does not delete what exists — that is a separate, deliberate action). |
-| **Raw audio** | **Never stored.** Transcribed in memory and discarded. Recording is push-to-talk and capped at 8 seconds. |
+| **Raw audio** | **Never stored.** Transcribed in memory and discarded — with continuous listening as with push-to-talk. Nothing is written to disk, and silent segments are never uploaded at all. |
 | **Transcripts** | Command-level telemetry only, and only while `voiceTranscriptRetention` is on. Turn it off and just the intent, confidence and outcome are recorded. |
 | **Delete** | *Delete model* · *Delete recordings* · *Delete all learning data* · *Clear voice history* — all in the UI, all available independently. |
 
@@ -592,12 +694,13 @@ hand-authored voice intent text, which contains no user data.
 
 ```bash
 pytest tests/                       # 138 unit + integration tests, ~4 s, no database needed
-cd backend && python tests/test_api_flow.py   # 84 end-to-end API assertions (needs MongoDB)
+cd backend && python tests/test_api_flow.py   # 96 end-to-end API assertions (needs MongoDB)
 ```
 
-`tests/` needs no MongoDB, Flask, webcam, MediaPipe or PyAutoGUI. The only fake is the keyboard
-backend, which subclasses the real one and records key presses instead of sending them — so a
-signature change in `KeyboardBackend` breaks the tests loudly.
+`tests/` needs no MongoDB, Flask, webcam, MediaPipe or PyAutoGUI. Two fakes stand at the OS
+boundary and nowhere else: `FakeKeyboard` subclasses the real backend and records key presses
+instead of sending them — so a signature change in `KeyboardBackend` breaks the tests loudly — and
+`FakeCom` scripts what PowerPoint would have answered, including the three slideshow states.
 
 | File | Covers |
 | --- | --- |
@@ -605,6 +708,11 @@ signature change in `KeyboardBackend` breaks the tests loudly.
 | `test_gesture_model.py` | class list derivation, split-by-recording (and leakage assertion), the quality gate, the collector, artifact round-trip, corrupt- and stale-version model refusal, inference, graceful degradation, the intent gate, every fallback path |
 | `test_voice_intent.py` | normalisation, number parsing, slide-vs-count disambiguation, intent classification, `NO_COMMAND` on ordinary speech, threshold bands, out-of-range rejection, the speech-recognizer interface |
 | `test_integration.py` | the numbered scenarios below, plus regressions: the five bindable commands, gesture toggling, debouncer semantics, boundary clamping, controller-capability fallback |
+| `test_gesture_stability.py` | the repeat bug from every direction (dropped frame, ambiguous frame, unmapped pose), the neutral-hold rule measured against the old behaviour on identical input, the stabilizer's vote, warm-up, tie-breaking and pointer pass-through |
+| `test_powerpoint_windows.py` | that the pointer can never emit `Ctrl+P` in **any** machine state, the pen refusal without a slideshow, drawing as a drag, erase through COM and its guarded fallback, pen-lift on every exit path, COM/keystroke navigation, and that the platform layer is inert off Windows |
+| `test_wake_word.py` | the wake-word machine exhaustively — ordinary speech, a talk that is *about* vision, segmentation, mis-transcriptions, restarts, timeouts, two commands in one segment, concurrent callers — and that its output actually classifies on the trained model |
+| `test_voice_continuous.py` | the service seam: continuous listening reaching the real interpreter and the real dispatcher, per-user state, and voice/gesture sharing one slide counter |
+| `test_end_to_end.py` | the fixes.md §6 verification list, one test each, driving `GestureEngine.decide()` — the same method the camera loop calls — with time advanced per frame so the 900 ms cooldown runs at its real value |
 
 `backend/tests/test_api_flow.py` covers the whole API including the new endpoints. Its voice
 section uses a **voice-only session**, which needs no camera, so the full
