@@ -27,7 +27,8 @@ Authorization: Bearer <jwt>
 ```
 
 The streaming endpoints (`/engine/stream`, `/engine/preview`) and the file endpoints
-(`/presentations/:id/slides/:n`, `/presentations/:id/file`) also accept `?token=<jwt>` because
+(`/presentations/:id/slides/:n`, `/presentations/:id/render/:n`, `/presentations/:id/file`) also
+accept `?token=<jwt>` because
 `EventSource` and `<img>` cannot set headers.
 
 **The authenticated user id is always taken from the token.** A `userId` in a request body is ignored.
@@ -62,10 +63,23 @@ Password rules: 8–128 characters. Emails are unique and lower-cased.
 | GET | `/presentations/:id` | — | `{presentation}` incl. `recentSessions`, `annotationCount`, `fileExists` |
 | PUT | `/presentations/:id` | `{title?, totalSlides?}` | `{presentation}` |
 | DELETE | `/presentations/:id` | — | `{}` |
-| GET | `/presentations/:id/slides/:n` | — | `image/png` |
+| GET | `/presentations/:id/slides/:n` | — | `image/png` — the 1.6x library thumbnail |
+| GET | `/presentations/:id/render/:n` | `?w=` | `image/png` — a full-resolution slide |
 | GET | `/presentations/:id/file` | — | the original file |
 
 Accepted uploads: `.pdf`, `.pptx`, `.ppt`, max 50 MB (configurable via `MAX_UPLOAD_MB`).
+
+A `.pptx` is converted to PDF **once, at upload, by headless LibreOffice** — Microsoft PowerPoint is
+not required at any point, and is never involved at presentation time. `GET /health` reports
+`pptxConverter.ready` so this can be checked before the first upload.
+
+`/render/:n` is what the presentation window displays and `/slides/:n` is what the library shows;
+they are deliberately different images. `w` is the requested pixel width (default
+`VISIONX_SLIDE_RENDER_WIDTH`, 1920; capped at `VISIONX_SLIDE_RENDER_MAX_WIDTH`, 2560) and a render is
+never upscaled past the slide's own resolution. Results are cached on disk per `(slide, width)` and
+served with a 24-hour `max-age`, so the presentation window can prefetch the slides on either side of
+the current one. `404` means the slide is outside the deck, or the deck could not be converted —
+a `.pptx` needs LibreOffice on the server, once, at upload.
 
 ## Gestures
 
@@ -95,13 +109,33 @@ Engine counters win whenever the engine actually ran; the client summary is the 
 
 | Method | Path | Body | Returns |
 | --- | --- | --- | --- |
-| POST | `/annotations` | `{presentationId, slideNumber, sessionId?, annotationData:{points[], colour, width}}` | `{annotation}` (201) |
+| POST | `/annotations` | `{presentationId, slideNumber, sessionId?, annotationData:{points[], colour, width, space?}}` | `{annotation}` (201) |
 | GET | `/annotations/:presentationId/:slideNumber` | — | `{annotations, count}` |
 | GET | `/annotations/presentation/:presentationId` | — | `{annotations, count}` |
 | DELETE | `/annotations/:annotationId` | — | `{}` |
 | DELETE | `/annotations/:presentationId/:slideNumber` | — | `{removed}` |
 
 A stroke needs at least 2 and at most 5000 points, each `{x, y}` normalised to 0–1.
+
+### Annotation coordinate spaces
+
+`annotationData.space` records which coordinate system a stroke's points are in.
+Strokes arrive from two places that do **not** agree, and conflating them puts ink
+somewhere other than where it was drawn:
+
+| `space` | Points are normalised over | Drawn |
+| --- | --- | --- |
+| `camera` *(default)* | the **camera frame** — the fingertip, from the gesture engine | stretched by the reach margin (0.15) onto the slide |
+| `slide` | the **slide itself** — a mouse or touch stroke drawn on the canvas | as-is |
+
+The presenter cannot comfortably reach the edges of the camera frame, so that
+region is inset and stretched back over the slide when rendered. A `slide`-space
+stroke that goes through the same stretch is displaced by up to 15% of the slide,
+and further the closer to an edge it was drawn.
+
+Omitting `space` means `camera`, because every stroke written before this field
+existed came from the gesture engine. An unrecognised value is rejected (422)
+rather than coerced — a typo must not silently pick a coordinate system.
 
 ## Analytics
 
@@ -144,7 +178,12 @@ Twelve commands exist. Five are bindable to a hand pose (unchanged); the other s
 parameter or are awkward to hold a pose for, and are reachable from voice, the control bar and
 the keyboard fallback.
 
-| Command | Bindable | Parameters | PowerPoint |
+The `PowerPoint mode` column applies **only** when a session runs with
+`VISIONX_PRESENTATION_MODE=powerpoint`. In the default web mode there is no keystroke, no mouse
+event and no COM call: the command changes VisionX's own presentation state, the window is told, and
+every one of the twelve is delivered. `tests/test_no_powerpoint.py` enforces this.
+
+| Command | Bindable | Parameters | PowerPoint mode |
 | --- | --- | --- | --- |
 | `NEXT_SLIDE` | yes | `count?` (1–20) | Right Arrow |
 | `PREVIOUS_SLIDE` | yes | `count?` (1–20) | Left Arrow |
@@ -194,6 +233,24 @@ must leave the pen on. An out-of-range `slideNumber` is **rejected**, never clam
 {"type": "error",  "code": "CAMERA_UNAVAILABLE", "message": "…"}
 {"type": "annotations_saved",   "count": 3}
 {"type": "annotations_cleared", "slide": 2}
+
+// --- the presentation window (web mode) ---------------------------------
+// The pointer channel. Published at camera frame rate, NOT rate-limited with
+// telemetry, and coalescing: a client that falls behind receives the newest
+// position rather than a backlog of stale ones. `x`/`y` are camera-normalised
+// (0..1) - the reach margin is applied by whoever draws, which is also what the
+// dispatcher persists, so live ink and replayed ink land in the same place.
+{"type": "pointer", "x": 0.51, "y": 0.42, "drawing": true, "t": 1786475523.2}
+
+// Stroke boundaries. BEGIN carries the point the pen went down on, because the
+// pointer is moved into position before the pen is pressed.
+{"type": "ink", "action": "BEGIN", "x": 0.30, "y": 0.40}
+{"type": "ink", "action": "END"}
+{"type": "ink", "action": "CLEAR"}
+
+{"type": "mode", "pointerActive": true, "annotationActive": false}
+{"type": "presentation", "action": "NEXT"}   // NEXT|PREVIOUS|GOTO|FIRST|LAST|
+                                             // BLACKOUT|WHITEOUT|START|END
 ```
 
 `status` values: `IDLE`, `LOW_CONFIDENCE`, `UNMAPPED`, `HOLDING`, `WAIT_NEUTRAL`, `COOLDOWN`,
@@ -258,7 +315,8 @@ arrives as `{"type": "training"}` SSE events, and `GET /personalization/train/st
 
 ### Continuous listening — `POST /voice/stream`
 
-The browser records continuously and posts ~3-second segments. Each is transcribed and offered to
+The browser records continuously and posts a segment each time the presenter stops speaking
+(silence-endpointed, capped at 2.5 s). Each is transcribed and offered to
 that user's wake-word machine; **most segments do nothing at all**. The trained intent model only
 sees text that the presenter framed as a command with `"Vision" … "OK"`.
 
@@ -274,7 +332,7 @@ A segment result always carries `wake`, and carries a full decision only when a 
     "buffered": "go to next slide",
     "matchedWake": "vision", "matchedTerminator": "ok",
     "shouldExecute": true,
-    // Every command completed in this segment, in the order spoken. A 3-second
+    // Every command completed in this segment, in the order spoken. One
     // recording can span a sentence boundary ("...slide two OK. Vision, next
     // slide, OK"), so this is occasionally longer than one - and every entry is
     // run, not just the last.
@@ -331,5 +389,37 @@ only while `voiceTranscriptRetention` is on.
 
 ## Health
 
-`GET /health` → `{status, database, engine, uploadDir, voiceIntentModel, speechBackends}`.
-No authentication required.
+`GET /health` — no authentication required.
+
+```jsonc
+{
+  "status": "ok",
+  "database": "connected",
+  "engine": "STOPPED",
+  "uploadDir": "…/backend/uploads",
+  "voiceIntentModel": true,
+  "speechBackends": {"faster-whisper": true, "openai-whisper": false},
+
+  // Which surface a new session will drive.
+  "presentationMode": "web",
+
+  // Can this machine turn a .pptx into slides? The web presentation mode needs
+  // no Microsoft Office at presentation time, but it does need a converter at
+  // upload time - and finding that out from an upload that silently produced no
+  // slides is the worst possible moment.
+  "pptxConverter": {
+    "policy": "auto",                    // VISIONX_PPTX_CONVERTER
+    "libreOffice": "/usr/bin/soffice",   // null when not installed
+    "powerPointFallback": false,         // Windows + policy allows it
+    "ready": true,                       // a .pptx can be converted
+    "pdfNeedsNoConverter": true          // a .pdf never needs any of this
+  },
+
+  // In web mode this is NOT_USED and no COM bridge is constructed - the health
+  // check must not attach to PowerPoint to answer a question about VisionX.
+  // Only in VISIONX_PRESENTATION_MODE=powerpoint does it probe for a slideshow
+  // and return CONFIRMED / DENIED / UNKNOWN.
+  "powerpoint": {"slideshow": "NOT_USED",
+                 "reason": "VisionX is rendering the presentation itself."}
+}
+```

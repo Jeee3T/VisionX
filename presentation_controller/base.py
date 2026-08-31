@@ -8,6 +8,24 @@ class. VisionX does not claim Slides support until such a class actually exists.
 
 from abc import ABC, abstractmethod
 
+# --- readiness vocabulary -----------------------------------------------------
+# Defined here, on the interface, rather than in the Windows/PowerPoint layer
+# that happens to be the only implementation which can return DENIED.
+#
+# The direction of this dependency matters. When these lived in
+# `presentation_controller.windows`, every controller that wanted to describe its
+# own readiness - including the PowerPoint-free web one - had to import the
+# PowerPoint COM module to name a string. `windows.py` re-exports them, so the
+# platform layer depends on the interface and not the other way round.
+#
+# The distinction between DENIED and UNKNOWN is the whole point for a controller
+# that drives another application: DENIED is "the app told us it is not ready,
+# do not send that shortcut", UNKNOWN is "we could not ask". A controller that IS
+# the presentation surface is always CONFIRMED, because there is nothing to ask.
+SLIDESHOW_CONFIRMED = "CONFIRMED"
+SLIDESHOW_DENIED = "DENIED"
+SLIDESHOW_UNKNOWN = "UNKNOWN"
+
 
 class PresentationControlError(RuntimeError):
     """Raised when the OS-level control layer is unavailable."""
@@ -81,9 +99,7 @@ class PresentationController(ABC):
         return False
 
     def slideshow_state(self) -> str:
-        """CONFIRMED / DENIED / UNKNOWN - is a slideshow actually running?"""
-        from presentation_controller.windows import SLIDESHOW_UNKNOWN
-
+        """CONFIRMED / DENIED / UNKNOWN - is this controller ready to present?"""
         return SLIDESHOW_UNKNOWN
 
     def capabilities(self) -> set[str]:

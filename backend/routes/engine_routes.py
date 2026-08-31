@@ -1,7 +1,6 @@
 """Live gesture-engine control, SSE telemetry and the camera preview stream."""
 
 import json
-import queue
 import time
 
 from flask import Blueprint, Response, g, request, stream_with_context
@@ -100,8 +99,14 @@ def cameras():
 def stream():
     """Server-Sent Events: the interim live channel (see README > Live updates).
 
-    Telemetry is rate-limited inside the engine, so this stream carries roughly
-    12 events per second regardless of camera frame rate.
+    Two kinds of traffic share the connection, deliberately:
+
+        telemetry / commands / state   rate-limited inside the engine to ~12 Hz
+        pointer positions              published at camera frame rate, coalesced
+
+    Pointer events do NOT go through the telemetry limiter. The virtual pointer
+    has to follow the presenter's fingertip, and a 12 Hz ceiling is visible as
+    lag; a discrete command at 30 Hz would just be noise. See services.event_bus.
     """
     subscriber = bus.subscribe()
 
@@ -111,13 +116,19 @@ def stream():
         try:
             yield f"data: {json.dumps({'type': 'connected'})}\n\n"
             while True:
-                try:
-                    event = subscriber.get(timeout=1.0)
-                    yield f"data: {json.dumps(event)}\n\n"
-                except queue.Empty:
+                # Blocks until something arrives on either channel, then takes
+                # everything waiting. The pointer channel coalesces inside the
+                # subscriber, so a browser that falls behind receives the newest
+                # fingertip position rather than a backlog of stale ones.
+                events = subscriber.drain(timeout=1.0)
+                if not events:
                     if time.time() - last_beat >= HEARTBEAT_SECONDS:
                         last_beat = time.time()
                         yield ": keep-alive\n\n"
+                    continue
+                last_beat = time.time()
+                for event in events:
+                    yield f"data: {json.dumps(event)}\n\n"
         except GeneratorExit:  # client navigated away
             pass
         finally:

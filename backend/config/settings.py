@@ -35,6 +35,10 @@ class Settings:
     if not UPLOAD_DIR.is_absolute():
         UPLOAD_DIR = BACKEND_DIR / UPLOAD_DIR
     THUMBNAIL_DIR = UPLOAD_DIR / "thumbnails"
+    # Full-resolution slide renders for the presentation window. Separate from
+    # thumbnails: a thumbnail is a 1.6x preview for a card in the library, and
+    # putting that on a projector is what makes a deck look blurry.
+    SLIDE_DIR = UPLOAD_DIR / "slides"
 
     MAX_UPLOAD_MB = _int("MAX_UPLOAD_MB", 50)
     MAX_CONTENT_LENGTH = MAX_UPLOAD_MB * 1024 * 1024
@@ -47,6 +51,35 @@ class Settings:
         "application/octet-stream",  # some browsers send this for .pptx
     }
 
+    # --- Presentation surface ------------------------------------------------
+    # "web"        VisionX renders the deck in its own presentation window. The
+    #              default, and what removes the Ctrl+P / focus / pointer-lag
+    #              problems of driving PowerPoint through keyboard automation.
+    # "powerpoint" drive the PowerPoint installed on this machine, as before.
+    PRESENTATION_MODE = (os.getenv("VISIONX_PRESENTATION_MODE") or "web").strip().lower()
+
+    # Width in pixels that slides are rendered at for the presentation window.
+    # 1920 is a projector/laptop panel; the renderer never upscales past the
+    # slide's own resolution, so a larger number costs nothing on a small deck.
+    SLIDE_RENDER_WIDTH = _int("VISIONX_SLIDE_RENDER_WIDTH", 1920)
+    SLIDE_RENDER_MAX_WIDTH = _int("VISIONX_SLIDE_RENDER_MAX_WIDTH", 2560)
+    # Which backend converts .pptx -> PDF so VisionX can render the slides.
+    #
+    #   "libreoffice"  headless LibreOffice only. The PowerPoint-independent
+    #                  path, and what the web presentation mode is built on.
+    #   "auto"         LibreOffice, then PowerPoint COM if LibreOffice is not
+    #                  installed. The default: LibreOffice is tried FIRST, so a
+    #                  machine with both never launches PowerPoint.
+    #   "powerpoint"   PowerPoint COM only. Legacy; needs Microsoft Office.
+    #
+    # Note the order in "auto". PowerPoint is a *fallback*, never a requirement:
+    # a .pptx must be presentable on a machine with no Office install at all.
+    PPTX_CONVERTER = (os.getenv("VISIONX_PPTX_CONVERTER") or "auto").strip().lower()
+
+    # Where PPTX -> PDF conversion looks for LibreOffice. Empty means "search
+    # PATH, then the usual install locations".
+    SOFFICE_PATH = os.getenv("VISIONX_SOFFICE_PATH") or ""
+
     # --- Computer vision defaults (overridable per session) ------------------
     CV_CAMERA_INDEX = _int("CV_CAMERA_INDEX", 0)
     CV_FRAME_WIDTH = _int("CV_FRAME_WIDTH", 640)
@@ -54,6 +87,11 @@ class Settings:
     CV_CONFIDENCE_THRESHOLD = float(os.getenv("CV_CONFIDENCE_THRESHOLD", "0.72"))
     CV_DEBOUNCE_FRAMES = _int("CV_DEBOUNCE_FRAMES", 6)
     CV_COOLDOWN_MS = _int("CV_COOLDOWN_MS", 900)
+    # Fingertip smoothing, 0..1. Governs the continuous pointer stream only -
+    # never discrete commands, which is why the debounce settings above do not
+    # touch it. The presentation window interpolates between the positions it
+    # receives, so this only has to take the jitter out, not the motion.
+    CV_POINTER_SMOOTHING = float(os.getenv("CV_POINTER_SMOOTHING", "0.5"))
 
     # --- temporal stability --------------------------------------------------
     # Plurality vote over this many frames before a pose reaches the command
@@ -79,6 +117,11 @@ class Settings:
     # --- Voice assistant -----------------------------------------------------
     VOICE_DEFAULT_ENABLED = os.getenv("VOICE_DEFAULT_ENABLED", "0") == "1"
     VOICE_STT_BACKEND = os.getenv("VOICE_STT_BACKEND") or None   # None = auto-detect
+    # Load Whisper and the intent model in a background thread at boot instead of
+    # on the first command. Without it the first "Vision ... OK" of a talk pays
+    # the model load - seconds, in front of an audience - and every later one is
+    # fast, which is the worst possible place to put that cost.
+    VOICE_PREWARM = os.getenv("VOICE_PREWARM", "1") == "1"
     VOICE_WHISPER_MODEL = os.getenv("VISIONX_WHISPER_MODEL", "base.en")
     VOICE_EXECUTE_THRESHOLD = float(os.getenv("VOICE_EXECUTE_THRESHOLD", "0.75"))
     VOICE_CONFIRM_THRESHOLD = float(os.getenv("VOICE_CONFIRM_THRESHOLD", "0.50"))
@@ -90,6 +133,7 @@ class Settings:
     def ensure_dirs(cls) -> None:
         cls.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
         cls.THUMBNAIL_DIR.mkdir(parents=True, exist_ok=True)
+        cls.SLIDE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 settings = Settings()

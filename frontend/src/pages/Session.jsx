@@ -12,6 +12,7 @@ import {
   PenLine,
   Play,
   RefreshCw,
+  ExternalLink,
 } from 'lucide-react'
 import StatusStrip from '../components/session/StatusStrip'
 import CameraPreview from '../components/session/CameraPreview'
@@ -63,9 +64,44 @@ export default function Session() {
   const [ending, setEnding] = useState(false)
 
   const startedAt = useRef(null)
+  // The presentation window this session opened. Held so the same window is
+  // focused rather than a second one opened, and so it can be closed when the
+  // session ends - a presentation window outliving its session would keep
+  // showing a slide nothing is driving any more.
+  const presentationWindow = useRef(null)
   const live = phase === 'live'
   const { telemetry, engineState, lastCommand, connected, streamError } = useEngineStream(live)
   const idle = useIdle(3000, telemetry?.executed ? lastCommand?.receivedAt : undefined)
+
+  /**
+   * Open (or re-focus) the dedicated presentation window.
+   *
+   * A real window rather than a fullscreen tab: the presenter needs the control
+   * window on their laptop and the deck on the projector at the same time, which
+   * a fullscreen tab in the same window cannot do. `noopener` is deliberately
+   * NOT set - the handle is what lets the session close the window when it ends.
+   */
+  const openPresentationWindow = useCallback(() => {
+    const existing = presentationWindow.current
+    if (existing && !existing.closed) {
+      existing.focus()
+      return existing
+    }
+    const url = `/present?presentationId=${presentationId || ''}`
+    const opened = window.open(
+      url,
+      'visionx-presentation',
+      'popup=yes,width=1280,height=720,menubar=no,toolbar=no,location=no,status=no',
+    )
+    if (!opened) {
+      toast.error(
+        'Your browser blocked the presentation window. Allow pop-ups for VisionX, then click "Presentation window".',
+      )
+      return null
+    }
+    presentationWindow.current = opened
+    return opened
+  }, [presentationId, toast])
 
   // --- setup data ----------------------------------------------------------
   useEffect(() => {
@@ -114,16 +150,33 @@ export default function Session() {
     return () => clearInterval(timer)
   }, [live])
 
+  // The slide on screen, readable from an async callback. Two ink fetches can be
+  // in flight at once when the presenter moves quickly, and they can complete out
+  // of order - without this guard slide 2's ink lands on slide 3.
+  const showingSlide = useRef(slide)
+  showingSlide.current = slide
+
   const loadStrokes = useCallback(() => {
     if (!presentationId) return
+    const forSlide = slide
     annotationApi
-      .forSlide(presentationId, slide)
-      .then((response) => setStrokes(response.data.annotations))
-      .catch(() => setStrokes([]))
+      .forSlide(presentationId, forSlide)
+      .then((response) => {
+        if (showingSlide.current !== forSlide) return
+        setStrokes(response.data.annotations)
+      })
+      .catch(() => {
+        if (showingSlide.current !== forSlide) return
+        setStrokes([])
+      })
   }, [presentationId, slide])
 
   useEffect(() => {
-    if (live) loadStrokes()
+    if (!live) return
+    // Cleared first: otherwise the new slide is briefly shown carrying the
+    // previous slide's annotations, for as long as the fetch takes.
+    setStrokes([])
+    loadStrokes()
   }, [live, loadStrokes])
 
   // Refresh persisted ink when the engine saves or clears it.
@@ -169,6 +222,16 @@ export default function Session() {
       setSlide(1)
       setElapsed(0)
       setPhase('live')
+
+      // Only when there is something to present. A free session has no deck, so
+      // the window would open on the projector showing "No presentation
+      // selected" - worse than not opening it, and the presenter would have to
+      // close it by hand.
+      //
+      // Opened from inside the click that started the session, so the browser
+      // treats it as user-initiated and does not block it. Opening it later,
+      // from an effect, is what pop-up blockers exist to stop.
+      if (presentationId) openPresentationWindow()
     } catch (err) {
       setStartError(err)
       setPhase('setup')
@@ -179,6 +242,12 @@ export default function Session() {
     if (!session) return
     setEnding(true)
     try {
+      // Closed first: the summary screen must not leave a dead deck on the
+      // projector while the presenter reads their stats.
+      if (presentationWindow.current && !presentationWindow.current.closed) {
+        presentationWindow.current.close()
+      }
+      presentationWindow.current = null
       const response = await sessionApi.complete(session.id, {
         slidesNavigated: Math.max(0, slide - 1),
       })
@@ -191,10 +260,14 @@ export default function Session() {
     }
   }
 
-  // Never leave the camera running if the presenter navigates away.
+  // Never leave the camera running - or a presentation window open - if the
+  // presenter navigates away.
   useEffect(() => {
     return () => {
       if (startedAt.current) engineApi.stop().catch(() => {})
+      if (presentationWindow.current && !presentationWindow.current.closed) {
+        presentationWindow.current.close()
+      }
     }
   }, [])
 
@@ -256,8 +329,8 @@ export default function Session() {
             <h1 className="mt-1.5 text-2xl font-semibold">{presentation?.title || 'Free session'}</h1>
             <p className="mt-1 text-sm text-white/75">
               {presentation
-                ? `${presentation.totalSlides || 0} slides · gestures drive PowerPoint on this machine`
-                : 'No deck selected — gestures will control whatever is on screen.'}
+                ? `${presentation.totalSlides || 0} slides · VisionX presents them in their own window`
+                : 'No deck selected — start a session to control a presentation you open later.'}
             </p>
           </div>
 
@@ -365,13 +438,16 @@ export default function Session() {
             </div>
 
             <div className="mt-4 rounded-xl bg-ink-50 p-4 text-xs leading-relaxed text-ink-500">
-              Open your slideshow in PowerPoint (F5) on this machine before starting. VisionX sends real key
-              presses, so whichever window has focus receives the commands.
+              VisionX opens a separate presentation window and shows your slides there — drag it to your
+              projector or second screen. Nothing is typed into another application, so PowerPoint does not
+              need to be open and no other window can steal your commands. Keep this window on your laptop:
+              it is your camera preview and controls. Allow pop-ups for VisionX so the presentation window
+              can open.
             </div>
 
             <button onClick={start} disabled={starting} className="btn-primary mt-6 w-full py-3.5">
               {starting ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} />}
-              {starting ? 'Starting camera…' : 'Start session'}
+              {starting ? 'Starting camera…' : 'Start presentation'}
             </button>
           </div>
         </div>
@@ -472,6 +548,21 @@ export default function Session() {
             )
           })}
           <span className="mx-1 h-5 w-px bg-white/15" />
+          {/* Re-opens the presentation window if the presenter closed it, or if
+              the browser blocked the pop-up when the session started. Disabled
+              for a free session, which has no deck to show. */}
+          <button
+            onClick={openPresentationWindow}
+            disabled={!presentationId}
+            title={
+              presentationId
+                ? 'Presentation window'
+                : 'This session has no presentation to show'
+            }
+            className="rounded-xl px-3 py-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+          >
+            <ExternalLink size={17} />
+          </button>
           <button
             onClick={toggleFullscreen}
             title="Toggle fullscreen"

@@ -8,6 +8,22 @@ from config.database import annotations, presentations
 from utils.errors import NotFoundError, ValidationError
 from utils.serializers import serialize, serialize_many
 
+# Which coordinate space a stroke's points are in. Strokes come from two places
+# that do NOT agree, and nothing recorded which was which:
+#
+#   "camera"  the fingertip, normalised over the camera frame. The presenter
+#             cannot comfortably reach the edges of that frame, so it is inset by
+#             a margin and stretched back over the slide when drawn.
+#   "slide"   already normalised over the slide itself - a mouse or touch stroke
+#             drawn straight onto the canvas. Stretching it moves it.
+#
+# Storing this is the fix for mouse-drawn ink reappearing somewhere other than
+# where it was drawn. "camera" is the default because every stroke written before
+# this field existed came from the gesture engine.
+SPACE_CAMERA = "camera"
+SPACE_SLIDE = "slide"
+COORDINATE_SPACES = (SPACE_CAMERA, SPACE_SLIDE)
+
 
 def _assert_owns_presentation(user_id: str, presentation_id: str) -> ObjectId:
     oid = ObjectId(presentation_id)
@@ -20,6 +36,13 @@ def _assert_owns_presentation(user_id: str, presentation_id: str) -> ObjectId:
 def create(user_id: str, presentation_id: str, slide_number: int, annotation_data: dict,
            session_id: str | None = None) -> dict:
     presentation_oid = _assert_owns_presentation(user_id, presentation_id)
+
+    space = str((annotation_data or {}).get("space") or SPACE_CAMERA).lower()
+    if space not in COORDINATE_SPACES:
+        raise ValidationError(
+            f"Unknown annotation coordinate space '{space}'. "
+            f"Expected one of: {', '.join(COORDINATE_SPACES)}."
+        )
 
     points = (annotation_data or {}).get("points")
     if not isinstance(points, list) or len(points) < 2:
@@ -39,6 +62,7 @@ def create(user_id: str, presentation_id: str, slide_number: int, annotation_dat
             "points": [{"x": float(p["x"]), "y": float(p["y"])} for p in points],
             "colour": str(annotation_data.get("colour", "#ef4444"))[:16],
             "width": int(annotation_data.get("width", 4)),
+            "space": space,
         },
         "createdAt": datetime.now(timezone.utc),
     }

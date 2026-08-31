@@ -63,6 +63,112 @@ def _powerpoint_health() -> dict:
         return {"slideshow": "UNKNOWN", "reason": str(exc)}
 
 
+def _converter_health() -> dict:
+    """Which .pptx -> PDF converter this machine can actually use. Never raises."""
+    try:
+        from utils.files import _soffice_executable
+
+        soffice = _soffice_executable()
+    except Exception as exc:  # noqa: BLE001 - health must never 500
+        return {"policy": settings.PPTX_CONVERTER, "ready": False, "error": str(exc)}
+
+    # `sys.platform`, not an import from the presentation layer: this is a
+    # question about the host, and reaching into `presentation_controller.windows`
+    # to ask it would load the COM module during a health check in web mode.
+    powerpoint = sys.platform.startswith("win") and \
+        settings.PPTX_CONVERTER in ("auto", "powerpoint")
+    libreoffice = bool(soffice) and settings.PPTX_CONVERTER in ("auto", "libreoffice")
+    return {
+        "policy": settings.PPTX_CONVERTER,
+        # The PowerPoint-independent path, and the one the web mode is built on.
+        "libreOffice": soffice or None,
+        "powerPointFallback": powerpoint,
+        "ready": libreoffice or powerpoint,
+        # A .pdf never needs any of this.
+        "pdfNeedsNoConverter": True,
+    }
+
+
+def _enable_dpi_awareness_for_powerpoint_mode() -> None:
+    """Per-monitor DPI awareness - only needed when driving PowerPoint.
+
+    In legacy PowerPoint mode VisionX moves the real mouse, so it has to see the
+    display the way Windows really lays it out: every laptop ships scaled to 125%
+    or 150%, and without this the virtual pointer lands at roughly 80% of where
+    the presenter is pointing. It must be set before anything asks for the screen
+    size.
+
+    In web mode there is no such mapping - the browser scales the slide and the
+    pointer is a fraction of it - so this is skipped, and with it the import of
+    `presentation_controller.windows`. A web-mode process must be able to show
+    that it never loaded the COM layer at all, and an unconditional import here
+    would have made that false before the first request arrived.
+    """
+    if settings.PRESENTATION_MODE != "powerpoint":
+        return
+
+    from presentation_controller.windows import IS_WINDOWS, enable_dpi_awareness
+
+    if IS_WINDOWS and not enable_dpi_awareness():
+        logger.warning(
+            "Could not enable per-monitor DPI awareness. On a scaled display the "
+            "virtual pointer may not line up with the presenter's fingertip."
+        )
+
+
+def _prewarm_voice() -> None:
+    """Load the speech and intent models now, on a background thread.
+
+    Both are process-wide singletons that load lazily on first use. Lazily is the
+    wrong time: the first "Vision ... OK" of a talk would pay the Whisper model
+    load and its first-inference graph build - several seconds, in front of an
+    audience - while every command after it is fast. Moving that cost to boot is
+    the single largest reduction in *perceived* voice latency, and it costs the
+    presenter nothing because the API is already starting.
+
+    Daemon thread, every failure swallowed: a machine with no speech backend
+    installed must still start the API and serve gesture control.
+    """
+    if not settings.VOICE_PREWARM:
+        return
+
+    def warm() -> None:
+        try:
+            from voice_assistant.intent.interpreter import get_interpreter
+
+            get_interpreter()
+        except Exception as exc:  # noqa: BLE001 - never block startup
+            logger.debug("Intent model prewarm skipped: %s", exc)
+        try:
+            from voice_assistant.speech.factory import get_speech_recognizer
+
+            recognizer = get_speech_recognizer(
+                settings.VOICE_STT_BACKEND, settings.VOICE_WHISPER_MODEL,
+            )
+            # Not just constructed: the first real transcription is slower than
+            # the rest because the runtime builds its graph on it. warm_up feeds
+            # it a second of silence so the presenter's first command does not.
+            warm_up = getattr(recognizer, "warm_up", None)
+            if callable(warm_up):
+                warm_up()
+            if recognizer.name in ("none", "null"):
+                # `get_speech_recognizer` returns a null recognizer rather than
+                # raising, so "it returned something" is not the same as "voice
+                # will work". Saying "warm" here would be a lie the operator only
+                # discovers mid-talk.
+                logger.info(
+                    "No speech-to-text backend is installed, so there is nothing to "
+                    "warm up. Voice commands will report themselves unavailable; "
+                    "gesture control is unaffected."
+                )
+            else:
+                logger.info("Voice pipeline warm (%s)", recognizer.name)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Speech prewarm skipped: %s", exc)
+
+    threading.Thread(target=warm, name="visionx-voice-prewarm", daemon=True).start()
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = settings.MAX_CONTENT_LENGTH
@@ -78,18 +184,9 @@ def create_app() -> Flask:
 
     settings.ensure_dirs()
 
-    # VisionX drives the PowerPoint running on this same machine, so the process
-    # has to see the display the way Windows really lays it out. Per-monitor DPI
-    # awareness must be set before anything asks for the screen size, and every
-    # laptop ships scaled to 125% or 150% - without this the virtual pointer
-    # lands at roughly 80% of where the presenter is pointing.
-    from presentation_controller.windows import IS_WINDOWS, enable_dpi_awareness
+    _enable_dpi_awareness_for_powerpoint_mode()
 
-    if IS_WINDOWS and not enable_dpi_awareness():
-        logger.warning(
-            "Could not enable per-monitor DPI awareness. On a scaled display the "
-            "virtual pointer may not line up with the presenter's fingertip."
-        )
+    _prewarm_voice()
 
     for blueprint in (auth_bp, user_bp, presentation_bp, gesture_bp,
                       session_bp, annotation_bp, analytics_bp, engine_bp,
@@ -114,10 +211,23 @@ def create_app() -> Flask:
                 "uploadDir": str(settings.UPLOAD_DIR),
                 "voiceIntentModel": intent_model_status().get("available", False),
                 "speechBackends": speech_probe(),
-                # Whether VisionX can see a PowerPoint slideshow right now. The
-                # pen and the eraser both depend on one running, and this is the
-                # cheapest way for a presenter to check before they start.
-                "powerpoint": _powerpoint_health(),
+                # Which surface a new session will drive. "web" means VisionX
+                # renders the deck itself and nothing below is relevant.
+                "presentationMode": settings.PRESENTATION_MODE,
+                # Whether this machine can turn a .pptx into slides. The web
+                # presentation mode needs no Microsoft Office at presentation
+                # time, but it does need *a* converter at upload time - and an
+                # operator should learn that here rather than from an upload
+                # that silently produces no slides.
+                "pptxConverter": _converter_health(),
+                # Whether VisionX can see a PowerPoint slideshow right now. Only
+                # meaningful in "powerpoint" mode - in web mode the pen and the
+                # eraser do not depend on PowerPoint at all, so the probe is
+                # skipped rather than reporting a scary UNKNOWN about something
+                # that is not being used.
+                "powerpoint": (_powerpoint_health() if settings.PRESENTATION_MODE == "powerpoint"
+                               else {"slideshow": "NOT_USED",
+                                     "reason": "VisionX is rendering the presentation itself."}),
             },
             "message": "VisionX API is running.",
         })

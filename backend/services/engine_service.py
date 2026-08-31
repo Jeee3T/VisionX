@@ -2,11 +2,25 @@
 
 Wiring, top to bottom:
     GestureEngine (recognition)  ->  CommandDispatcher (dispatch)
-                                 ->  PowerPointController (control, PyAutoGUI)
+                                 ->  a PresentationController (control)
     engine events                ->  EventBus  ->  SSE stream to the browser
     fired commands / strokes     ->  MongoDB (history + annotations)
 
-Only one engine may run at a time: there is one webcam and one desktop to drive.
+Two controllers implement that last interface, chosen per session:
+
+    WebPresentationController   VisionX renders the deck in its own presentation
+                                window. The default. No keystrokes, no mouse
+                                automation, no COM - so none of the PowerPoint
+                                integration's failure modes exist.
+    PowerPointController        drives the PowerPoint installed on this machine,
+                                as VisionX always did. Kept for a presenter who
+                                genuinely wants to run their own PowerPoint, and
+                                selected with `options.presentationMode`.
+
+The dispatcher, the engine, the voice pipeline and every route above them are
+identical either way: that is the whole reason the controller was an interface.
+
+Only one engine may run at a time: there is one webcam and one deck to drive.
 """
 
 import logging
@@ -30,11 +44,15 @@ from multimodal.command import build as build_intent
 from multimodal.context import context as multimodal_context
 from presentation_controller.annotation import AnnotationController
 from presentation_controller.dispatcher import CommandDispatcher
-from presentation_controller.powerpoint import PowerPointController
+from presentation_controller.web import WebPresentationController
+from services.annotation_service import SPACE_CAMERA
 from services.event_bus import bus
 from utils.errors import EngineError
 
 logger = logging.getLogger(__name__)
+
+MODE_WEB = "web"
+MODE_POWERPOINT = "powerpoint"
 
 
 class EngineService:
@@ -71,7 +89,7 @@ class EngineService:
         if the webcam is unavailable the presenter can still drive PowerPoint by
         voice, and both paths dispatch through the same CommandDispatcher.
         """
-        controller = PowerPointController()
+        controller = self._build_controller(options)
         self.dispatcher = CommandDispatcher(controller, AnnotationController())
         self.dispatcher.bind_presentation(
             current_slide=int(options.get("startSlide") or 1),
@@ -86,9 +104,43 @@ class EngineService:
             "userId": user_id,
             "presentationId": str(session_doc.get("presentationId") or ""),
             "presentationTitle": (presentation or {}).get("title", ""),
+            "totalSlides": int((presentation or {}).get("totalSlides") or 0),
+            # Which surface is being driven. The presentation window reads this to
+            # know whether it is the thing showing the slides.
+            "presentationMode": controller.name,
             "startedAt": time.time(),
         }
         multimodal_context.update_slide(self.dispatcher.current_slide)
+
+    def _build_controller(self, options: dict):
+        """Pick the presentation surface for this session.
+
+        Web by default. `presentationMode` is honoured when the caller asks for
+        PowerPoint explicitly, so an existing workflow that drives the installed
+        PowerPoint keeps working unchanged - but it is no longer what a presenter
+        gets by default, and none of the new presentation experience depends on it.
+
+        `PowerPointController` is imported **inside the branch that asks for it**,
+        not at module scope. That is not a micro-optimisation: importing it pulls
+        in `presentation_controller.keyboard` (PyAutoGUI) and
+        `presentation_controller.windows` (COM), and a web-mode process must be
+        able to demonstrate that it never loaded either. `tests/test_no_powerpoint.py`
+        asserts exactly that against `sys.modules`, which is only a meaningful
+        check if nothing imports them speculatively.
+        """
+        mode = str(options.get("presentationMode")
+                   or settings.PRESENTATION_MODE or MODE_WEB).strip().lower()
+        if mode in (MODE_POWERPOINT, "ppt", "com"):
+            from presentation_controller.powerpoint import PowerPointController
+
+            logger.info("Session will drive Microsoft PowerPoint (legacy mode).")
+            return PowerPointController()
+        # Bound to the bus here rather than inside the controller so the controller
+        # itself stays a plain object with no Flask or service imports - which is
+        # what lets the tests drive it with a list.
+        return WebPresentationController(
+            publish=bus.publish, publish_pointer=bus.publish_pointer,
+        )
 
     # --- lifecycle -----------------------------------------------------------
     def start(self, user_id: str, session_doc: dict, presentation: dict | None, preferences: dict,
@@ -118,6 +170,9 @@ class EngineService:
                 release_frames=int(
                     options.get("releaseFrames", settings.CV_RELEASE_FRAMES)
                 ) or None,
+                pointer_smoothing=float(
+                    options.get("pointerSmoothing", settings.CV_POINTER_SMOOTHING)
+                ),
                 mirror=bool(options.get("mirror", True)),
                 preferences=preferences,
                 user_id=user_id,
@@ -423,6 +478,12 @@ class EngineService:
                     "points": stroke["points"],
                     "colour": stroke["colour"],
                     "width": stroke["width"],
+                    # The fingertip, normalised over the CAMERA frame - not over
+                    # the slide. Whoever draws this applies the reach margin.
+                    # Recorded rather than assumed, because mouse strokes arrive
+                    # through annotation_service in the slide's own space and the
+                    # two are indistinguishable once stored.
+                    "space": SPACE_CAMERA,
                 },
                 "createdAt": datetime.now(timezone.utc),
             }

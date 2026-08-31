@@ -118,6 +118,23 @@ def run() -> int:
 
         response = client.get(f"/api/presentations/{presentation_id}/slides/1", headers=auth)
         check("slide preview served", response.status_code == 200 and response.mimetype == "image/png")
+        thumbnail_bytes = len(response.data)
+
+        # The presentation window's own render path: a full-resolution slide,
+        # which is what the audience sees. Distinct from the preview above -
+        # putting a 1.6x thumbnail on a projector is what made a deck look blurry.
+        response = client.get(
+            f"/api/presentations/{presentation_id}/render/1?w=1920", headers=auth)
+        check("presentation-resolution slide rendered",
+              response.status_code == 200 and response.mimetype == "image/png",
+              # Never decoded as text: a successful response here is a PNG.
+              f"status={response.status_code} type={response.mimetype}")
+        check("the render is larger than the library thumbnail",
+              len(response.data) > thumbnail_bytes, f"{len(response.data)} vs {thumbnail_bytes}")
+
+        response = client.get(
+            f"/api/presentations/{presentation_id}/render/99", headers=auth)
+        check("a slide past the end of the deck is refused", response.status_code == 404)
 
         response = client.get("/api/presentations", headers=auth)
         check("library lists the upload", response.json["data"]["count"] == 1)
@@ -128,6 +145,8 @@ def run() -> int:
         other_auth = {"Authorization": f"Bearer {other.json['data']['token']}"}
         response = client.get(f"/api/presentations/{presentation_id}", headers=other_auth)
         check("another user cannot read the presentation", response.status_code == 404)
+        response = client.get(f"/api/presentations/{presentation_id}/render/1", headers=other_auth)
+        check("another user cannot render this deck's slides", response.status_code == 404)
 
         print("\n5. Session lifecycle")
         response = client.post("/api/sessions", headers=auth, json={"presentationId": presentation_id})
@@ -302,6 +321,19 @@ def run() -> int:
         if voice_session_started:
             check("voice-only session reports no camera",
                   response.json["data"]["engine"]["cameraActive"] is False)
+
+            # The architectural change, asserted over HTTP: a session drives the
+            # VisionX presentation window, not the PowerPoint on this machine.
+            engine_state = response.json["data"]["engine"]
+            check("the session drives the web presentation surface",
+                  engine_state["controller"]["controller"] == "web",
+                  str(engine_state.get("controller")))
+            check("no OS automation is involved",
+                  engine_state["controller"].get("automation") == "none",
+                  str(engine_state.get("controller")))
+            check("every command is available on the web surface",
+                  len(engine_state["controller"]["capabilities"]) == 12,
+                  str(engine_state["controller"]["capabilities"]))
 
             response = client.post("/api/voice/interpret", headers=auth,
                                    json={"text": "go to slide 2", "sessionId": voice_session_id})

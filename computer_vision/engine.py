@@ -64,6 +64,13 @@ class EngineConfig:
     # one stray frame from becoming a command; see stabilizer.py / debouncer.py.
     stabilizer_window: int = 5
     release_frames: int | None = None
+    # --- pointer ------------------------------------------------------------
+    # Exponential smoothing factor for the fingertip, 0..1: higher follows the
+    # hand more closely, lower is steadier. This governs the *continuous* pointer
+    # stream only and is deliberately independent of the debounce/cooldown rules
+    # above, which govern discrete commands. Letting the debouncer throttle
+    # fingertip movement is what made the old pointer feel laggy.
+    pointer_smoothing: float = 0.35
     # --- personalized recognition (optional) --------------------------------
     user_id: str | None = None
     personalization_enabled: bool = False
@@ -505,14 +512,20 @@ class GestureEngine:
             logger.debug("Pointer-lost subscriber raised", exc_info=True)
 
     def _track_pointer(self, pointer):
-        """Exponentially smooth the fingertip so the on-screen dot does not jitter."""
+        """Exponentially smooth the fingertip so the on-screen dot does not jitter.
+
+        `pointer_smoothing` trades steadiness against lag. It is kept low enough
+        that the residual delay is a couple of frames: the web presentation window
+        interpolates between the positions it receives, so heavy smoothing here
+        would only add lag the client cannot undo.
+        """
         if pointer is None:
             self._pointer_smooth = None
             return None
         if self._pointer_smooth is None:
             self._pointer_smooth = pointer
         else:
-            alpha = 0.35
+            alpha = min(1.0, max(0.05, float(self.config.pointer_smoothing)))
             self._pointer_smooth = (
                 self._pointer_smooth[0] * (1 - alpha) + pointer[0] * alpha,
                 self._pointer_smooth[1] * (1 - alpha) + pointer[1] * alpha,

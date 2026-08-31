@@ -8,7 +8,14 @@ from bson import ObjectId
 from config.database import annotations, presentation_history, presentations
 from config.settings import settings
 from utils.errors import NotFoundError, ValidationError
-from utils.files import count_slides, delete_files, generate_thumbnails, store_upload, validate_upload
+from utils.files import (
+    count_slides,
+    delete_files,
+    generate_thumbnails,
+    render_slide,
+    store_upload,
+    validate_upload,
+)
 from utils.serializers import serialize, serialize_many
 
 
@@ -111,6 +118,34 @@ def thumbnail_path(user_id: str, presentation_id: str, index: int) -> Path:
     if not path.exists():
         raise NotFoundError("Slide preview not available.")
     return path
+
+
+def render_path(user_id: str, presentation_id: str, index: int, width: int) -> Path:
+    """A slide rendered at presentation resolution, for the presentation window.
+
+    Distinct from `thumbnail_path`, which serves the 1.6x library preview. The
+    presentation window is what an audience looks at, so it gets a real render of
+    the presenter's own file rather than an enlarged thumbnail.
+    """
+    document = get_owned(user_id, presentation_id)
+    total = int(document.get("totalSlides") or 0) or len(document.get("thumbnails") or [])
+    if index < 1 or (total and index > total):
+        raise NotFoundError(f"Slide {index} does not exist in this presentation.")
+
+    source = Path(document["filePath"])
+    if not source.exists():
+        raise NotFoundError("The stored file is missing from the server.")
+
+    rendered = render_slide(
+        source, f".{document.get('fileType', '')}".lower(),
+        document.get("storedName", ""), index, width,
+    )
+    if rendered is None:
+        raise NotFoundError(
+            "This slide could not be rendered. Install PowerPoint or LibreOffice on "
+            "this machine so VisionX can convert the deck, then re-upload it."
+        )
+    return rendered
 
 
 def file_path(user_id: str, presentation_id: str) -> tuple[Path, str]:

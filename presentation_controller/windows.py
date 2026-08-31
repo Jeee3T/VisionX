@@ -34,13 +34,20 @@ logger = logging.getLogger(__name__)
 IS_WINDOWS = sys.platform == "win32"
 
 # --- slideshow probe outcomes -------------------------------------------------
-# The distinction between DENIED and UNKNOWN is the whole point: DENIED is
-# PowerPoint telling us there is no slideshow, and a shortcut must not be sent.
-# UNKNOWN is "we could not ask" - on a non-Windows dev box, or with no COM
-# binding installed - and there the historical behaviour is the safest one.
-SLIDESHOW_CONFIRMED = "CONFIRMED"
-SLIDESHOW_DENIED = "DENIED"
-SLIDESHOW_UNKNOWN = "UNKNOWN"
+# Re-exported from the interface, not defined here. The distinction between
+# DENIED and UNKNOWN is the whole point of the probe below: DENIED is PowerPoint
+# telling us there is no slideshow, and a shortcut must not be sent. UNKNOWN is
+# "we could not ask" - on a non-Windows dev box, or with no COM binding installed
+# - and there the historical behaviour is the safest one.
+#
+# They live in `base` so that a controller which does not drive PowerPoint can
+# name them without importing this module. Every existing
+# `from presentation_controller.windows import SLIDESHOW_*` keeps working.
+from presentation_controller.base import (  # noqa: E402
+    SLIDESHOW_CONFIRMED,
+    SLIDESHOW_DENIED,
+    SLIDESHOW_UNKNOWN,
+)
 
 # PowerPoint's PpSlideShowPointerType enumeration.
 PP_POINTER_NONE = 0

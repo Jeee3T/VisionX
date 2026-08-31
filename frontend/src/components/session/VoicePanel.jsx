@@ -142,7 +142,7 @@ export default function VoicePanel({ sessionId, hidden, onCommand }) {
                 </div>
               ) : (
                 <p className="mt-0.5 text-[11px] text-white/40">
-                  {decision.executed ? 'Sent to PowerPoint' : decision.message}
+                  {decision.executed ? 'Done' : decision.message}
                 </p>
               )}
             </>

@@ -4,29 +4,73 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * Always-on microphone capture for the "Vision <command> OK" flow.
  *
  * The presenter opens the microphone once, at the start of the talk, and never
- * touches the web app again. The recorder runs continuously and is cut into short
- * segments; each segment is uploaded, transcribed on the server and offered to the
- * wake-word machine. Ordinary speech does nothing.
+ * touches the web app again. The recorder runs continuously and is cut into
+ * segments; each segment is uploaded, transcribed on the server and offered to
+ * the wake-word machine. Ordinary speech does nothing.
  *
- * Segmenting rather than streaming, because MediaRecorder's timeslice chunks are
- * not independently decodable - only the first carries the container header, so a
- * chunk on its own is not a file Whisper can open. Each segment is therefore its
- * own complete recording: stop the recorder, start a new one, upload the finished
- * blob. The restart is immediate, so the gap is a few milliseconds.
+ * ## Why segments end on silence, not on a timer
+ *
+ * This used to cut a new segment every 3 seconds, and that fixed timer was the
+ * single largest source of voice latency in VisionX. It sat *before* every other
+ * cost in the pipeline:
+ *
+ *     presenter says "...OK"
+ *          |
+ *          |  up to 3 s   <-- waiting for the timer to close the segment
+ *          v
+ *     upload -> Whisper -> intent -> dispatch
+ *
+ * The presenter had already finished speaking, VisionX had the audio, and it was
+ * waiting for a clock. Worse, it was *unpredictable*: the same command took
+ * 0.3 s or 3.3 s depending on where in the window it happened to land.
+ *
+ * A segment now ends when the presenter stops talking. `END_SILENCE_MS` after
+ * the level drops below the speech threshold, the recorder is closed and the
+ * segment goes up. Speech that keeps going is still cut at `MAX_SEGMENT_MS` so a
+ * presenter mid-sentence never blocks a command that completed earlier in it.
+ *
+ * That turns "OK" into a full stop the machine can hear: the audio is on its way
+ * to Whisper within ~350 ms of the word ending, instead of up to 3 s later.
+ *
+ * ## Ordering
  *
  * Segments do NOT overlap - the next recorder starts in the previous one's
  * `onstop` - so the server's state machine is what stitches a command back
- * together across a boundary. That is why segments must be uploaded in order and
- * none may be silently dropped: "Vision" / "next slide" / "OK" is three segments,
- * and losing the middle one loses the command.
+ * together across a boundary. Segments must therefore be uploaded in order and
+ * none may be silently dropped: "Vision" / "next slide" / "OK" can be three
+ * segments, and losing the middle one loses the command.
  */
-const SEGMENT_SECONDS = 3
 const MIME_CANDIDATES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']
 
 // Below this peak level the segment is silence: uploading it would cost a Whisper
 // pass to transcribe nothing. Measured on the same 0..1 scale as `level`.
 const SILENCE_LEVEL = 0.04
 const MIN_SEGMENT_BYTES = 1600
+
+// --- endpointing ------------------------------------------------------------
+// How long the level must stay below SILENCE_LEVEL before the segment is
+// considered finished. Long enough to survive the pause between words in "go to
+// next slide", short enough that "OK" is on its way to Whisper almost at once.
+const END_SILENCE_MS = 350
+// Speech shorter than this is a cough, a door, a chair. Such a segment is still
+// CLOSED promptly - holding the recorder open would delay the next real command -
+// but it is not uploaded: an almost-empty Whisper pass costs as much as a real
+// one and is where Whisper invents text.
+//
+// 150 ms, not more: "OK" on its own is a legitimate segment of roughly 250 ms,
+// and dropping it would lose the command it terminates.
+const MIN_SPEECH_MS = 150
+// A hard ceiling for continuous speech. A presenter who talks without pausing
+// still gets cut here, so a command completed early in a long sentence is not
+// held hostage by the rest of it. Also bounds what one Whisper pass has to chew.
+const MAX_SEGMENT_MS = 2500
+// While nobody is speaking the recorder is simply restarted rather than left
+// accumulating silence, so a segment never opens with 20 seconds of nothing in
+// front of the words.
+const MAX_IDLE_MS = 4000
+// How often the endpointer looks at the level. The meter runs on rAF (~60 Hz),
+// which is more than enough resolution; this is just the decision interval.
+const ENDPOINT_TICK_MS = 50
 
 // Transcription is slower than capture, so segments queue behind one another.
 // The queue is bounded: if the server falls this far behind, the presenter has
@@ -55,6 +99,15 @@ export default function useContinuousVoice({ onSegment, enabled = false } = {}) 
   const startingRef = useRef(false)
   const queueRef = useRef([])
   const [dropped, setDropped] = useState(0)
+
+  // --- endpointer state ----------------------------------------------------
+  // Written on the rAF meter and read on the endpoint tick, never in render, so
+  // they are refs: a state update per audio frame would re-render 60 times a
+  // second and is exactly the kind of work that makes a laptop drop camera frames.
+  const speechStartedRef = useRef(0)   // when speech began in this segment, 0 = not yet
+  const lastLoudRef = useRef(0)        // the most recent frame above SILENCE_LEVEL
+  const spokeForRef = useRef(0)        // how long speech lasted, measured at close
+  const closingRef = useRef(false)     // this segment is already being closed
 
   // Kept in a ref so restarting the recorder every few seconds does not need to
   // re-create the whole capture pipeline when the callback identity changes.
@@ -103,8 +156,10 @@ export default function useContinuousVoice({ onSegment, enabled = false } = {}) 
     // it eventually receives is stopped rather than left running.
     startingRef.current = false
     queueRef.current = []
-    clearTimeout(timerRef.current)
+    clearInterval(timerRef.current)
     timerRef.current = null
+    closingRef.current = false
+    speechStartedRef.current = 0
     cancelAnimationFrame(rafRef.current)
     rafRef.current = null
     try {
@@ -134,10 +189,25 @@ export default function useContinuousVoice({ onSegment, enabled = false } = {}) 
     // Remembered across the segment so a quiet segment that contained one loud
     // word is still uploaded.
     peakRef.current = Math.max(peakRef.current, value)
+
+    if (value >= SILENCE_LEVEL) {
+      const now = performance.now()
+      lastLoudRef.current = now
+      // The first loud frame of this segment is where speech began. Used to
+      // refuse segments too short to be a word, and to decide whether the
+      // segment contained speech at all.
+      if (!speechStartedRef.current) speechStartedRef.current = now
+    }
     rafRef.current = requestAnimationFrame(meter)
   }, [])
 
-  /** Record one segment, upload it, and immediately start the next. */
+  /** Record one segment, upload it, and immediately start the next.
+   *
+   * The segment ends when the presenter stops talking, not on a timer - see the
+   * module comment. `closeSegment` is idempotent because three independent
+   * conditions can reach it (silence, the length ceiling, the idle ceiling) and
+   * they can all be true in the same tick.
+   */
   const recordSegment = useCallback(() => {
     const stream = streamRef.current
     if (!runningRef.current || !stream) return
@@ -161,9 +231,18 @@ export default function useContinuousVoice({ onSegment, enabled = false } = {}) 
     }
 
     recorder.onstop = () => {
+      clearInterval(timerRef.current)
+      timerRef.current = null
       const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' })
       chunksRef.current = []
-      const loudEnough = peakRef.current >= SILENCE_LEVEL && blob.size > MIN_SEGMENT_BYTES
+      // Four ways a segment can be worth nothing: no speech at all, speech too
+      // brief to be a word, a loudest moment that was still silence, or too few
+      // bytes to hold one. Each costs a Whisper pass to learn nothing.
+      const loudEnough =
+        speechStartedRef.current > 0 &&
+        spokeForRef.current >= MIN_SPEECH_MS &&
+        peakRef.current >= SILENCE_LEVEL &&
+        blob.size > MIN_SEGMENT_BYTES
 
       // Start the next segment before awaiting the upload, so listening never
       // pauses while the server transcribes.
@@ -191,9 +270,57 @@ export default function useContinuousVoice({ onSegment, enabled = false } = {}) 
       return
     }
 
-    timerRef.current = setTimeout(() => {
+    // A fresh segment: nothing spoken in it yet, and the silence clock starts now.
+    const openedAt = performance.now()
+    speechStartedRef.current = 0
+    lastLoudRef.current = 0
+    spokeForRef.current = 0
+    closingRef.current = false
+
+    const closeSegment = () => {
+      if (closingRef.current) return
+      closingRef.current = true
+      // Measured here rather than in `onstop`: by the time the recorder's stop
+      // event fires, the meter has been running through the trailing silence and
+      // `lastLoud` still points at the last real speech - but the next segment's
+      // reset may already have run if the recorder stopped slowly.
+      spokeForRef.current = speechStartedRef.current
+        ? lastLoudRef.current - speechStartedRef.current
+        : 0
+      clearInterval(timerRef.current)
+      timerRef.current = null
       if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
-    }, SEGMENT_SECONDS * 1000)
+    }
+
+    timerRef.current = setInterval(() => {
+      if (!runningRef.current) return closeSegment()
+      const now = performance.now()
+      const spoke = speechStartedRef.current > 0
+
+      if (!spoke) {
+        // Nothing has been said in this segment. Recycle the recorder rather than
+        // let it accumulate silence, so when the presenter does speak, the words
+        // are near the front of a short segment instead of buried in a long one.
+        if (now - openedAt >= MAX_IDLE_MS) closeSegment()
+        return
+      }
+
+      // Speech, then quiet for long enough to be a full stop. This is the path
+      // that "Vision next slide OK" takes, and it fires ~350 ms after "OK".
+      //
+      // No minimum length is applied here on purpose. Whether the segment was
+      // long enough to be worth transcribing is an *upload* question, decided in
+      // `onstop`; holding the recorder open to answer it would delay the next
+      // real command by exactly as long as the noise that triggered it.
+      if (now - lastLoudRef.current >= END_SILENCE_MS) {
+        closeSegment()
+        return
+      }
+
+      // Still talking. Cut anyway at the ceiling so a command that completed
+      // early in a long sentence is not held hostage by the rest of it.
+      if (now - openedAt >= MAX_SEGMENT_MS) closeSegment()
+    }, ENDPOINT_TICK_MS)
   }, [teardown, drain])
 
   const start = useCallback(async () => {
@@ -281,6 +408,10 @@ export default function useContinuousVoice({ onSegment, enabled = false } = {}) 
     dropped,
     start,
     stop,
-    segmentSeconds: SEGMENT_SECONDS,
+    // The endpointer's shape, for a UI that wants to explain the behaviour.
+    // There is no fixed segment length any more: a segment is as long as the
+    // presenter talks, bounded by MAX_SEGMENT_MS.
+    endSilenceMs: END_SILENCE_MS,
+    maxSegmentMs: MAX_SEGMENT_MS,
   }
 }
