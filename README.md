@@ -72,9 +72,16 @@ VisionX presents your deck itself, in a dedicated presentation window you put on
 | Index + middle              | `VIRTUAL_POINTER`   | Toggles the pointer; the on-slide dot follows your fingertip at frame rate |
 | Index only                  | `ANNOTATION_MODE`   | Toggles the pen; your fingertip draws on the slide canvas |
 | Index + middle + ring       | `CLEAR_ANNOTATION`  | Erases the ink on the current slide, leaving the pen as it was |
+| Open palm                   | `RESET_ANNOTATION`  | Back to the default state: erases the ink **and** leaves pen and pointer mode |
 
 Poses are **not hardcoded to commands** — every binding lives in the user's `GesturePreferences`
 document and can be reassigned in the UI. A saved remap applies to a running session immediately.
+
+`CLEAR_ANNOTATION` and `RESET_ANNOTATION` differ in exactly one thing, and it is the reason both
+exist: Clear erases the ink and deliberately leaves the pen armed, so you can carry on drawing on a
+clean slide. Reset erases the ink and leaves pen *and* pointer mode, so whatever mode you had lost
+track of, an open palm puts you back at a known state. It computes no toggle — repeating it cannot
+make things worse — and it never moves the deck.
 
 Seven more commands exist that a pose cannot express, because they take a parameter or are awkward
 to hold a hand still for. Voice, the on-screen control bar and the keyboard fallback can all issue
@@ -294,7 +301,8 @@ Two optional detours off that path:
   command travels the exact same dispatcher as a gesture, so it lands in the same history and the
   same analytics.
 
-Keyboard fallback during a session: `←` `→` `P` `A` `E` go through the exact same dispatcher.
+Keyboard fallback during a session: `←` `→` `P` `A` `E` `Esc` go through the exact same dispatcher
+(`Esc` is Reset; in the presentation window, where `Esc` closes the window, Reset is `X`).
 
 ### The presentation window
 
@@ -827,7 +835,7 @@ MongoDB collections (see `backend/models/schema.py`):
 | ---------------------- | --------------------------------------------- |
 | `users`                | name, email, bcrypt hash, profilePhoto, createdAt |
 | `presentations`        | userId, title, fileName, storedName, filePath, fileType, totalSlides, thumbnails, uploadedAt |
-| `gesture_preferences`  | one per user — the five pose bindings         |
+| `gesture_preferences`  | one per user — the six pose bindings          |
 | `presentation_history` | one per session — status, times, duration, slidesNavigated, annotationsMade, commandsFired, gestureCounts |
 | `annotations`          | presentationId, sessionId, slideNumber, annotationData, createdAt |
 | `personalization`      | one per user — multimodal opt-ins, consent, thresholds, model pointer |
@@ -892,7 +900,7 @@ instead of sending them — so a signature change in `KeyboardBackend` breaks th
 | `test_canonicalization.py` | translation / scale / rotation invariance, the exact canonical frame, aspect handling, malformed input |
 | `test_gesture_model.py` | class list derivation, split-by-recording (and leakage assertion), the quality gate, the collector, artifact round-trip, corrupt- and stale-version model refusal, inference, graceful degradation, the intent gate, every fallback path |
 | `test_voice_intent.py` | normalisation, number parsing, slide-vs-count disambiguation, intent classification, `NO_COMMAND` on ordinary speech, threshold bands, out-of-range rejection, the speech-recognizer interface |
-| `test_integration.py` | the numbered scenarios below, plus regressions: the five bindable commands, gesture toggling, debouncer semantics, boundary clamping, controller-capability fallback |
+| `test_integration.py` | the numbered scenarios below, plus regressions: the bindable commands, gesture toggling, debouncer semantics, boundary clamping, controller-capability fallback |
 | `test_gesture_stability.py` | the repeat bug from every direction (dropped frame, ambiguous frame, unmapped pose), the neutral-hold rule measured against the old behaviour on identical input, the stabilizer's vote, warm-up, tie-breaking and pointer pass-through |
 | `test_powerpoint_windows.py` | that the pointer can never emit `Ctrl+P` in **any** machine state, the pen refusal without a slideshow, drawing as a drag, erase through COM and its guarded fallback, pen-lift on every exit path, COM/keystroke navigation, and that the platform layer is inert off Windows |
 | `test_wake_word.py` | the wake-word machine exhaustively — ordinary speech, a talk that is *about* vision, segmentation, mis-transcriptions, restarts, timeouts, two commands in one segment, concurrent callers — and that its output actually classifies on the trained model |

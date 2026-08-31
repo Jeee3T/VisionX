@@ -22,6 +22,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     ANNOTATION_MODE,
     CLEAR_ANNOTATION,
     DEFAULT_PREFERENCES,
+    RESET_ANNOTATION,
     NEXT_SLIDE,
     PREVIOUS_SLIDE,
     VIRTUAL_POINTER,
@@ -34,12 +35,19 @@ from computer_vision.engine import (
     GestureEngine,
 )
 from computer_vision.gesture_recognition.gesture_recognizer import GestureResult
-from computer_vision.gesture_recognition.poses import NO_HAND
+from computer_vision.gesture_recognition.poses import NO_HAND, POSE_NAMES
 from multimodal.command import SOURCE_GESTURE, SOURCE_VOICE
 from multimodal.command import build as build_intent
 from tests.conftest import FakeCom, build_dispatcher
 
 PRINT_HOTKEY = ("ctrl", "p")
+
+# The poses the default bindings leave free, derived rather than hard-coded: a
+# "resting hand" test is only testing anything while the pose it rests on is
+# genuinely unbound. Hard-coding one is how these tests came to rest on OPEN_PALM,
+# which stopped being neutral the day it was bound to Exit annotation.
+BOUND_POSES = frozenset(DEFAULT_PREFERENCES.values())
+RESTING_POSES = tuple(pose for pose in POSE_NAMES if pose not in BOUND_POSES)
 
 
 FPS = 30.0
@@ -169,7 +177,7 @@ def test_a_hand_resting_in_frame_never_moves_a_slide(harness):
     deliberately should.
     """
     rng = random.Random(5)
-    bound = ["PINKY_UP", "THUMB_UP", "INDEX_UP", "INDEX_MIDDLE_UP", "THREE_FINGERS_UP"]
+    bound = sorted(BOUND_POSES)
 
     for _ in range(200):                       # ~30 seconds of talking with the hands
         # Resting on an unbound pose, then away, then a brief transit through a
@@ -178,7 +186,7 @@ def test_a_hand_resting_in_frame_never_moves_a_slide(harness):
         # abutting the next one - two 4-frame transits with a single frame
         # between them are one 9-frame gesture, and should be treated as one.
         for _ in range(rng.randint(4, 10)):
-            harness.frame("OPEN_PALM")
+            harness.frame(rng.choice(RESTING_POSES))
         for _ in range(rng.randint(2, 6)):
             harness.frame(NO_HAND)
         pose = rng.choice(bound)
@@ -206,7 +214,7 @@ def test_an_unsettled_hand_never_moves_a_slide(harness):
 
 def test_a_presenter_who_never_gestures_never_moves_a_slide(harness):
     rng = random.Random(9)
-    poses = ["OPEN_PALM", "FIST", "FOUR_FINGERS_UP", NO_HAND, "UNKNOWN"]
+    poses = [*RESTING_POSES, NO_HAND, "UNKNOWN"]
     for _ in range(900):
         harness.frame(rng.choice(poses))
     assert harness.commands == []
@@ -656,3 +664,68 @@ def test_a_hand_that_really_leaves_still_ends_the_stroke(harness):
         harness.frame(NO_HAND)
     assert not harness.keyboard.mouse_is_down
     assert harness.dispatcher.annotations.count == 1
+
+
+# ============ "An open palm closes annotation and returns to default" =========
+# The escape hatch, driven the only way that proves anything: real frames through
+# the real recognizer -> stabilizer -> debouncer -> engine -> dispatcher chain.
+PALM = DEFAULT_PREFERENCES["resetGesture"]
+
+
+def test_an_open_palm_closes_annotation_and_clears_the_slide(harness):
+    harness.hold("INDEX_UP", 12)                 # pen on
+    for step in range(12):
+        harness.frame("INDEX_UP", pointer=(0.2 + step * 0.04, 0.5))
+    harness.release()
+    assert harness.dispatcher.annotations.count == 1
+    assert harness.dispatcher.annotation_active is True
+
+    harness.hold(PALM, 12)
+    assert RESET_ANNOTATION in harness.commands
+    assert harness.engine.mode == MODE_IDLE
+    assert harness.dispatcher.annotation_active is False
+    assert harness.com.erased == 1, "PowerPoint was never told to erase"
+    assert harness.dispatcher.annotations.strokes(harness.dispatcher.current_slide) == []
+
+
+def test_an_open_palm_lifts_the_pen_mid_stroke(harness):
+    """The palm goes up while the hand is still drawing. The mouse button must
+    come up with it, or PowerPoint keeps drawing to wherever the cursor lands."""
+    harness.hold("INDEX_UP", 12)
+    # A full second of drawing, so the 900 ms cooldown from turning the pen on has
+    # elapsed by the time the palm goes up - as it has for any real stroke. No
+    # `release()` here: the whole point is that the pen is still down.
+    for step in range(30):
+        harness.frame("INDEX_UP", pointer=(0.25 + step * 0.01, 0.4))
+    assert harness.keyboard.mouse_is_down
+
+    harness.hold(PALM, 12)
+    assert not harness.keyboard.mouse_is_down
+    assert harness.engine.mode == MODE_IDLE
+
+
+def test_an_open_palm_also_closes_the_pointer(harness):
+    """Reset means the default state, not "the pen off"."""
+    harness.hold("INDEX_MIDDLE_UP", 12)          # pointer on
+    assert harness.engine.mode == MODE_POINTER
+
+    harness.release()
+    harness.hold(PALM, 12)
+    assert harness.engine.mode == MODE_IDLE
+    assert harness.dispatcher.pointer_active is False
+
+
+def test_a_held_open_palm_resets_once(harness):
+    """It is still a gesture: the debouncer's neutral-release rule applies, so
+    holding the palm up does not fire reset over and over."""
+    harness.hold(PALM, 600)                      # 20 seconds at 30 fps
+    assert harness.commands == [RESET_ANNOTATION]
+
+
+def test_an_open_palm_never_moves_the_deck(harness):
+    harness.hold("PINKY_UP", 12)
+    assert harness.dispatcher.current_slide == 2
+
+    harness.release()
+    harness.hold(PALM, 60)
+    assert harness.dispatcher.current_slide == 2

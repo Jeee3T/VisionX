@@ -267,6 +267,46 @@ def test_clear_annotation_is_refused_when_there_is_no_slideshow(keyboard, not_pr
     assert "e" not in keyboard.keys()
 
 
+def test_reset_leaves_pen_mode_and_erases_through_com(keyboard, presenting):
+    """The open-palm escape hatch against a real slideshow."""
+    dispatcher = build_dispatcher(keyboard, presenting)
+    dispatcher.execute("ANNOTATION_MODE")
+    dispatcher.stream_pointer(0.3, 0.5)
+    dispatcher.stream_pointer(0.4, 0.5)
+
+    record = dispatcher.execute("RESET_ANNOTATION")
+
+    assert record["delivered"] is True
+    assert dispatcher.annotation_active is False
+    assert dispatcher.pointer_active is False
+    assert presenting.erased == 1
+    assert not keyboard.mouse_is_down
+    assert PRINT_HOTKEY not in keyboard.hotkeys(), "reset must never go near Ctrl+P"
+
+
+def test_a_refused_erase_still_leaves_annotation_mode(keyboard, not_presenting):
+    """The half of reset the presenter actually asked for cannot be held hostage
+    by the half that can refuse.
+
+    With no slideshow running PowerPoint will not erase - so the command reports
+    itself undelivered, exactly as Clear does. But the pen and the pointer must be
+    off regardless, or the one command whose job is to restore a known state has
+    instead left an unknown one.
+    """
+    dispatcher = build_dispatcher(keyboard, not_presenting)
+    dispatcher.execute("VIRTUAL_POINTER")
+    assert dispatcher.pointer_active is True
+
+    record = dispatcher.execute("RESET_ANNOTATION")
+
+    assert record["delivered"] is False
+    assert record["pointerActive"] is False
+    assert record["annotationActive"] is False
+    assert dispatcher.pointer_active is False
+    assert "e" not in keyboard.keys()
+    assert not keyboard.mouse_is_down
+
+
 def test_clearing_ink_is_not_a_mode_change(keyboard, presenting):
     """Erasing must leave the pen exactly as it was.
 

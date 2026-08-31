@@ -174,14 +174,14 @@ creates the same session record and the same `CommandDispatcher`, just without a
 
 ### Commands
 
-Twelve commands exist. Five are bindable to a hand pose (unchanged); the other seven need a
-parameter or are awkward to hold a pose for, and are reachable from voice, the control bar and
-the keyboard fallback.
+Thirteen commands exist. Six are bindable to a hand pose; the other seven need a parameter or are
+awkward to hold a pose for, and are reachable from voice, the control bar and the keyboard
+fallback.
 
 The `PowerPoint mode` column applies **only** when a session runs with
 `VISIONX_PRESENTATION_MODE=powerpoint`. In the default web mode there is no keystroke, no mouse
 event and no COM call: the command changes VisionX's own presentation state, the window is told, and
-every one of the twelve is delivered. `tests/test_no_powerpoint.py` enforces this.
+every one of the thirteen is delivered. `tests/test_no_powerpoint.py` enforces this.
 
 | Command | Bindable | Parameters | PowerPoint mode |
 | --- | --- | --- | --- |
@@ -190,6 +190,7 @@ every one of the twelve is delivered. `tests/test_no_powerpoint.py` enforces thi
 | `VIRTUAL_POINTER` | yes | `state?` (bool; omitted = toggle) | `Ctrl+L` / `Ctrl+A` |
 | `ANNOTATION_MODE` | yes | `state?` (bool; omitted = toggle) | `Ctrl+P` / `Ctrl+A` |
 | `CLEAR_ANNOTATION` | yes | — | `E` |
+| `RESET_ANNOTATION` | yes | — | `Ctrl+A` then `E` (pen and pointer off, then erase) |
 | `GO_TO_SLIDE` | no | `slideNumber` (required) | digits + Enter |
 | `FIRST_SLIDE` | no | — | Home |
 | `LAST_SLIDE` | no | — | End |

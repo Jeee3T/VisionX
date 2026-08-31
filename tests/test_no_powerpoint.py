@@ -386,7 +386,7 @@ def test_the_web_controller_never_reports_a_denied_state():
 
 
 def test_the_web_controller_can_deliver_every_command():
-    """Twelve of twelve. The PowerPoint controller cannot say this."""
+    """Every one of them. The PowerPoint controller cannot say this."""
     from computer_vision.command_mapping.gesture_mapper import ALL_COMMANDS
 
     assert WebPresentationController().capabilities() == set(ALL_COMMANDS)

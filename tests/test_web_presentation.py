@@ -19,6 +19,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     LAST_SLIDE,
     NEXT_SLIDE,
     PREVIOUS_SLIDE,
+    RESET_ANNOTATION,
     VIRTUAL_POINTER,
     WHITEOUT,
 )
@@ -350,3 +351,92 @@ def test_ending_the_presentation_leaves_no_mode_engaged(dispatcher, web):
     assert not dispatcher.annotation_active
     assert not dispatcher.pointer_active
     assert not web.pen_is_down
+
+
+# ============================ 11. THE ESCAPE HATCH ============================
+# RESET_ANNOTATION (open palm by default) is the one command that needs no
+# knowledge of the current state to be safe: whatever mode the presenter is in,
+# it puts them back at the default. Everything below is the difference between it
+# and CLEAR_ANNOTATION, which erases ink and deliberately keeps the pen armed.
+def test_reset_leaves_annotation_mode_and_erases_the_ink(dispatcher, bus):
+    gesture(dispatcher, ANNOTATION_MODE)
+    for step in range(10):
+        dispatcher.stream_pointer(0.3 + step * 0.01, 0.4)
+    dispatcher.end_stroke()
+    assert dispatcher.annotations.count == 1
+
+    record = gesture(dispatcher, RESET_ANNOTATION)
+    assert record["delivered"]
+    assert not dispatcher.annotation_active, "Reset must leave pen mode - that is the whole point"
+    assert not dispatcher.pointer_active
+    assert dispatcher.annotations.count == 0
+    assert "CLEAR" in bus.actions("ink")
+
+
+def test_reset_lifts_the_pen_mid_stroke(dispatcher, web):
+    """The palm goes up while the hand is still drawing. The button must come up
+    with it, or the pen keeps painting wherever the cursor goes next."""
+    gesture(dispatcher, ANNOTATION_MODE)
+    for step in range(10):
+        dispatcher.stream_pointer(0.3 + step * 0.01, 0.4)
+    assert web.pen_is_down
+
+    gesture(dispatcher, RESET_ANNOTATION)
+    assert not web.pen_is_down
+    assert not dispatcher.annotations.is_drawing
+
+
+def test_reset_also_leaves_pointer_mode(dispatcher, web):
+    """Not just the pen: reset means the *default* state, whichever mode is on."""
+    gesture(dispatcher, VIRTUAL_POINTER)
+    assert dispatcher.pointer_active
+
+    gesture(dispatcher, RESET_ANNOTATION)
+    assert not dispatcher.pointer_active
+    assert not dispatcher.annotation_active
+
+
+def test_reset_is_idempotent(dispatcher):
+    """It computes no toggle, so a presenter who has lost track of the mode
+    cannot make things worse by repeating the gesture."""
+    for _ in range(4):
+        record = gesture(dispatcher, RESET_ANNOTATION)
+        assert record["delivered"]
+        assert not dispatcher.annotation_active
+        assert not dispatcher.pointer_active
+
+
+def test_reset_from_the_default_state_changes_nothing_else(dispatcher):
+    """Slide position is not a mode: reset must not move the deck."""
+    gesture(dispatcher, NEXT_SLIDE)
+    gesture(dispatcher, NEXT_SLIDE)
+    gesture(dispatcher, RESET_ANNOTATION)
+    assert dispatcher.current_slide == 3
+
+
+def test_reset_erases_only_the_current_slide(dispatcher):
+    """Same scope as Clear: the ink the audience is looking at, not the deck."""
+    gesture(dispatcher, ANNOTATION_MODE)
+    for step in range(10):
+        dispatcher.stream_pointer(0.3 + step * 0.01, 0.4)
+    dispatcher.end_stroke()
+
+    gesture(dispatcher, NEXT_SLIDE)          # the pen stays armed across the slide
+    for step in range(10):
+        dispatcher.stream_pointer(0.5 + step * 0.01, 0.6)
+    dispatcher.end_stroke()
+    assert dispatcher.annotations.count == 2
+
+    gesture(dispatcher, RESET_ANNOTATION)
+    remaining = dispatcher.annotations.strokes()
+    assert len(remaining) == 1 and remaining[0]["slide"] == 1
+
+
+def test_reset_and_clear_differ_only_in_the_mode(dispatcher):
+    """The one distinction the two commands exist to make."""
+    gesture(dispatcher, ANNOTATION_MODE)
+    gesture(dispatcher, CLEAR_ANNOTATION)
+    assert dispatcher.annotation_active, "Clear keeps the pen armed"
+
+    gesture(dispatcher, RESET_ANNOTATION)
+    assert not dispatcher.annotation_active, "Reset does not"

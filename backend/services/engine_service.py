@@ -34,6 +34,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     ALL_COMMANDS,
     ANNOTATION_MODE,
     CLEAR_ANNOTATION,
+    RESET_ANNOTATION,
 )
 from computer_vision.engine import EngineConfig, GestureEngine, MODE_ANNOTATE
 from config.database import annotations as annotations_collection
@@ -396,9 +397,21 @@ class EngineService:
         # from VisionX while staying on the slide.
         if command == CLEAR_ANNOTATION and record.get("delivered"):
             self._clear_persisted_annotations(record["slide"])
-        elif command == ANNOTATION_MODE and not record["annotationActive"]:
-            # Terminal: the pen just went off, so the stroke really has ended.
+        elif command == RESET_ANNOTATION:
+            # Reset does what both of the branches above do, because it is both
+            # things at once: the pen went off, and the ink was erased.
+            #
+            # The flush is terminal (close_active=True) and runs whichever way the
+            # erase went. Delivered, the dispatcher has already emptied its buffer,
+            # so it persists nothing and only lifts the pen. Refused - no slideshow
+            # to erase in - the ink is still on the slide and still in the buffer,
+            # and the flush is what stops the stroke the presenter had just drawn
+            # from being lost. The delete only follows a delivered erase, for the
+            # same reason Clear guards it: a refused erase must not wipe stored ink
+            # that is still on screen.
             self._flush_annotations(close_active=True)
+            if record.get("delivered"):
+                self._clear_persisted_annotations(record["slide"])
 
         if self.dispatcher:
             multimodal_context.update_slide(self.dispatcher.current_slide)

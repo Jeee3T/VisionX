@@ -18,6 +18,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     ANNOTATION_MODE,
     CLEAR_ANNOTATION,
     GestureMapper,
+    RESET_ANNOTATION,
     VIRTUAL_POINTER,
 )
 from computer_vision.gesture_recognition.debouncer import (
@@ -451,6 +452,14 @@ class GestureEngine:
             # mode change: PowerPoint stays in whatever pointer mode it was in, so
             # the presenter can carry on drawing on a now-clean slide.
             self._release_pointer()
+        elif command == RESET_ANNOTATION:
+            # The escape hatch: whatever mode we were in, the engine goes back to
+            # IDLE. Unlike the two toggles above this computes no target - there is
+            # nothing to toggle, so a presenter who has lost track of the current
+            # mode cannot make it worse by repeating the gesture. `sync_mode` below
+            # still reconciles against what the dispatcher reports.
+            self._release_pointer()
+            self.set_mode(MODE_IDLE)
 
         payload = {
             "mode": self.mode,
