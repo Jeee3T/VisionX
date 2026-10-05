@@ -7,10 +7,21 @@ PREVIOUS_SLIDE = "PREVIOUS_SLIDE"
 VIRTUAL_POINTER = "VIRTUAL_POINTER"
 ANNOTATION_MODE = "ANNOTATION_MODE"
 CLEAR_ANNOTATION = "CLEAR_ANNOTATION"
+RESET_ANNOTATION = "RESET_ANNOTATION"
 
-# Commands a hand pose can be bound to. Unchanged: five poses, five commands,
-# which is what the gesture settings screen and GesturePreferences describe.
-COMMANDS = (NEXT_SLIDE, PREVIOUS_SLIDE, VIRTUAL_POINTER, ANNOTATION_MODE, CLEAR_ANNOTATION)
+# Commands a hand pose can be bound to: six poses, six commands, which is what
+# the gesture settings screen and GesturePreferences describe.
+#
+# RESET_ANNOTATION is the "stop everything" escape hatch. CLEAR_ANNOTATION erases
+# ink and deliberately leaves the pen armed so the presenter can carry on drawing
+# on a clean slide; RESET_ANNOTATION erases the ink *and* leaves pen and pointer
+# mode, putting the session back in its default state. An open palm is the
+# default binding because it is the pose a presenter already makes when they
+# stop gesturing and show the audience an empty hand.
+COMMANDS = (
+    NEXT_SLIDE, PREVIOUS_SLIDE, VIRTUAL_POINTER,
+    ANNOTATION_MODE, CLEAR_ANNOTATION, RESET_ANNOTATION,
+)
 
 # Commands that exist but are not bound to a pose: they need a parameter, or they
 # are awkward to hold a hand still for. Voice, the control bar and the keyboard
@@ -38,6 +49,7 @@ PREFERENCE_FIELDS = {
     "pointerGesture": VIRTUAL_POINTER,
     "annotationGesture": ANNOTATION_MODE,
     "clearGesture": CLEAR_ANNOTATION,
+    "resetGesture": RESET_ANNOTATION,
 }
 
 COMMAND_LABELS = {
@@ -46,6 +58,7 @@ COMMAND_LABELS = {
     VIRTUAL_POINTER: "Virtual pointer",
     ANNOTATION_MODE: "Annotation mode",
     CLEAR_ANNOTATION: "Clear annotation",
+    RESET_ANNOTATION: "Exit annotation",
     GO_TO_SLIDE: "Go to slide",
     FIRST_SLIDE: "First slide",
     LAST_SLIDE: "Last slide",
@@ -85,6 +98,7 @@ DEFAULT_PREFERENCES = {
     "pointerGesture": "INDEX_MIDDLE_UP",
     "annotationGesture": "INDEX_UP",
     "clearGesture": "THREE_FINGERS_UP",
+    "resetGesture": "OPEN_PALM",
 }
 
 

@@ -30,7 +30,7 @@ from computer_vision.engine import (
     GestureEngine,
 )
 from computer_vision.gesture_recognition.gesture_recognizer import GestureResult
-from computer_vision.gesture_recognition.poses import NO_HAND
+from computer_vision.gesture_recognition.poses import NO_HAND, POSE_NAMES
 from multimodal.command import SOURCE_GESTURE, SOURCE_VOICE
 from multimodal.command import build as build_intent
 from presentation_controller.annotation import AnnotationController
@@ -49,6 +49,12 @@ POSE_FOR = {command: pose for pose, command in
                  ("pointerGesture", VIRTUAL_POINTER),
                  ("annotationGesture", ANNOTATION_MODE),
              )]}
+
+# A pose no default binding claims, so "standing still" really is standing still.
+# Derived, not hard-coded: this test used to rest on OPEN_PALM, which is now bound
+# to Exit annotation, and a hard-coded pose turns that into a silent false pass.
+RESTING_POSE = next(pose for pose in POSE_NAMES
+                    if pose not in set(DEFAULT_PREFERENCES.values()))
 
 
 class WebHarness:
@@ -184,7 +190,7 @@ def test_the_deck_never_advances_on_its_own(harness):
     """Two minutes of a presenter standing still in front of the camera."""
     rng = random.Random(11)
     for _ in range(int(FPS * 120)):
-        harness.frame(NO_HAND if rng.random() < 0.5 else "OPEN_PALM")
+        harness.frame(NO_HAND if rng.random() < 0.5 else RESTING_POSE)
     assert harness.commands == []
     assert harness.dispatcher.current_slide == 1
 

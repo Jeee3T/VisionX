@@ -223,10 +223,10 @@ def test_both_modalities_produce_the_same_command_shape(interpreter, gesture_mod
 
 
 # ------------------------------------------------------------- regressions ---
-def test_existing_five_bindable_commands_are_unchanged():
+def test_existing_bindable_commands_are_unchanged():
     assert COMMANDS == (
         "NEXT_SLIDE", "PREVIOUS_SLIDE", "VIRTUAL_POINTER",
-        "ANNOTATION_MODE", "CLEAR_ANNOTATION",
+        "ANNOTATION_MODE", "CLEAR_ANNOTATION", "RESET_ANNOTATION",
     )
     assert set(COMMANDS).issubset(set(ALL_COMMANDS))
     ok, message = validate_preferences(DEFAULT_PREFERENCES)

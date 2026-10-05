@@ -19,6 +19,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     LAST_SLIDE,
     NEXT_SLIDE,
     PREVIOUS_SLIDE,
+    RESET_ANNOTATION,
     START_PRESENTATION,
     VIRTUAL_POINTER,
     WHITEOUT,
@@ -146,6 +147,7 @@ class CommandDispatcher:
             VIRTUAL_POINTER: self._handle_pointer,
             ANNOTATION_MODE: self._handle_annotation,
             CLEAR_ANNOTATION: self._handle_clear,
+            RESET_ANNOTATION: self._handle_reset,
             START_PRESENTATION: self._handle_start,
             END_PRESENTATION: self._handle_end,
             BLACKOUT: self._handle_blackout,
@@ -264,6 +266,34 @@ class CommandDispatcher:
         # mode it was in. Claiming otherwise is what previously left the pen on in
         # PowerPoint while VisionX reported it off.
         self._sync_from_controller()
+
+    def _handle_reset(self, _parameters: dict) -> None:
+        """Back to the default state: no pen, no pointer, no ink.
+
+        The one command a presenter can reach for when they have lost track of
+        which mode they are in. Unlike CLEAR_ANNOTATION - which erases the ink and
+        deliberately leaves the pen armed - this leaves both modes as well, so the
+        next gesture is interpreted against a known state.
+
+        Modes come off *before* the erase, because the erase is the part that can
+        refuse (PowerPoint will not erase without a running slideshow) and exiting
+        the mode is the part the presenter actually asked for. A refused erase
+        still reports itself, but it can no longer strand the pen armed.
+        """
+        # Release the physical button first, or PowerPoint keeps drawing a line to
+        # wherever the cursor goes next.
+        self.controller.pen_up()
+        self.annotations.end()
+        try:
+            self.controller.set_annotation(False)
+            self.controller.set_pointer(False)
+        finally:
+            self._sync_from_controller(pointer=False, annotation=False)
+
+        # Same ordering as _handle_clear: erase on the slide first, and only drop
+        # our own buffer once we know the ink is really gone.
+        self.controller.clear_annotation()
+        self.annotations.clear(self.current_slide)
 
     def _sync_from_controller(self, pointer: bool | None = None,
                               annotation: bool | None = None) -> None:

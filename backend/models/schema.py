@@ -34,7 +34,7 @@ SCHEMA: dict[str, dict] = {
         "description": "One document per user mapping hand poses to commands.",
         "fields": [
             "_id", "userId", "nextSlideGesture", "previousSlideGesture",
-            "pointerGesture", "annotationGesture", "clearGesture",
+            "pointerGesture", "annotationGesture", "clearGesture", "resetGesture",
         ],
         "indexes": [{"keys": [("userId", ASCENDING)], "unique": True}],
     },

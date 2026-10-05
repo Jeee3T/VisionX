@@ -181,7 +181,12 @@ export default function Session() {
 
   // Refresh persisted ink when the engine saves or clears it.
   useEffect(() => {
-    if (live && lastCommand?.command === 'CLEAR_ANNOTATION') loadStrokes()
+    if (!live) return
+    // Reset erases the ink as well as leaving pen mode, so it invalidates the
+    // stored strokes exactly as Clear does.
+    if (lastCommand?.command === 'CLEAR_ANNOTATION' || lastCommand?.command === 'RESET_ANNOTATION') {
+      loadStrokes()
+    }
   }, [live, lastCommand?.receivedAt, lastCommand?.command, loadStrokes])
 
   // --- keyboard fallback (same dispatch path as gestures) ------------------
@@ -194,6 +199,7 @@ export default function Session() {
         p: 'VIRTUAL_POINTER',
         a: 'ANNOTATION_MODE',
         e: 'CLEAR_ANNOTATION',
+        Escape: 'RESET_ANNOTATION',
       }
       const command = map[event.key]
       if (!command) return

@@ -332,7 +332,7 @@ def run() -> int:
                   engine_state["controller"].get("automation") == "none",
                   str(engine_state.get("controller")))
             check("every command is available on the web surface",
-                  len(engine_state["controller"]["capabilities"]) == 12,
+                  len(engine_state["controller"]["capabilities"]) == 13,
                   str(engine_state["controller"]["capabilities"]))
 
             response = client.post("/api/voice/interpret", headers=auth,
@@ -446,9 +446,9 @@ def run() -> int:
 
         response = client.get("/api/engine/commands", headers=auth)
         commands = response.json["data"]["commands"]
-        check("command catalogue exposes 12 commands", len(commands) == 12)
-        check("exactly five commands are pose-bindable",
-              sum(1 for row in commands if row["bindable"]) == 5)
+        check("command catalogue exposes 13 commands", len(commands) == 13)
+        check("exactly six commands are pose-bindable",
+              sum(1 for row in commands if row["bindable"]) == 6)
 
         print("\n11. Profile")
         response = client.put("/api/users/me", headers=auth, json={"name": "Renamed User"})

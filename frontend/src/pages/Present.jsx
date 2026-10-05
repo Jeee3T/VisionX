@@ -367,6 +367,9 @@ export default function Present() {
       p: 'VIRTUAL_POINTER',
       a: 'ANNOTATION_MODE',
       e: 'CLEAR_ANNOTATION',
+      // Not Escape: that closes this window. `x` is the keyboard twin of the
+      // open-palm gesture - out of every mode, ink gone.
+      x: 'RESET_ANNOTATION',
       b: 'BLACKOUT',
       w: 'WHITEOUT',
     }

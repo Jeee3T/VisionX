@@ -4,6 +4,7 @@ import {
   MousePointer2,
   PenLine,
   Eraser,
+  Hand,
   Hash,
   SkipBack,
   SkipForward,
@@ -19,6 +20,9 @@ export const COMMANDS = {
   VIRTUAL_POINTER: { label: 'Virtual pointer', icon: MousePointer2, colour: 'text-violet-600', field: 'pointerGesture' },
   ANNOTATION_MODE: { label: 'Annotation mode', icon: PenLine, colour: 'text-amber-600', field: 'annotationGesture' },
   CLEAR_ANNOTATION: { label: 'Clear annotation', icon: Eraser, colour: 'text-rose-600', field: 'clearGesture' },
+  // The escape hatch. Clear erases the ink and leaves the pen armed; this erases
+  // it and leaves pen and pointer mode too, so the session is back at its default.
+  RESET_ANNOTATION: { label: 'Exit annotation', icon: Hand, colour: 'text-ink-700', field: 'resetGesture' },
 }
 
 /**
@@ -44,6 +48,7 @@ export const COMMAND_ORDER = [
   'VIRTUAL_POINTER',
   'ANNOTATION_MODE',
   'CLEAR_ANNOTATION',
+  'RESET_ANNOTATION',
 ]
 
 /** Engine status -> how the session strip should read. */
