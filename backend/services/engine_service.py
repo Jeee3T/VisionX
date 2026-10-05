@@ -2,11 +2,25 @@
 
 Wiring, top to bottom:
     GestureEngine (recognition)  ->  CommandDispatcher (dispatch)
-                                 ->  PowerPointController (control, PyAutoGUI)
+                                 ->  a PresentationController (control)
     engine events                ->  EventBus  ->  SSE stream to the browser
     fired commands / strokes     ->  MongoDB (history + annotations)
 
-Only one engine may run at a time: there is one webcam and one desktop to drive.
+Two controllers implement that last interface, chosen per session:
+
+    WebPresentationController   VisionX renders the deck in its own presentation
+                                window. The default. No keystrokes, no mouse
+                                automation, no COM - so none of the PowerPoint
+                                integration's failure modes exist.
+    PowerPointController        drives the PowerPoint installed on this machine,
+                                as VisionX always did. Kept for a presenter who
+                                genuinely wants to run their own PowerPoint, and
+                                selected with `options.presentationMode`.
+
+The dispatcher, the engine, the voice pipeline and every route above them are
+identical either way: that is the whole reason the controller was an interface.
+
+Only one engine may run at a time: there is one webcam and one deck to drive.
 """
 
 import logging
@@ -20,6 +34,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     ALL_COMMANDS,
     ANNOTATION_MODE,
     CLEAR_ANNOTATION,
+    RESET_ANNOTATION,
 )
 from computer_vision.engine import EngineConfig, GestureEngine, MODE_ANNOTATE
 from config.database import annotations as annotations_collection
@@ -30,16 +45,32 @@ from multimodal.command import build as build_intent
 from multimodal.context import context as multimodal_context
 from presentation_controller.annotation import AnnotationController
 from presentation_controller.dispatcher import CommandDispatcher
-from presentation_controller.powerpoint import PowerPointController
+from presentation_controller.web import WebPresentationController
+from services.annotation_service import SPACE_CAMERA
 from services.event_bus import bus
 from utils.errors import EngineError
 
 logger = logging.getLogger(__name__)
 
+MODE_WEB = "web"
+MODE_POWERPOINT = "powerpoint"
+
 
 class EngineService:
     def __init__(self):
         self._lock = threading.RLock()
+        # Persisting strokes has its own lock, deliberately NOT `_lock`.
+        #
+        # `_flush_annotations` runs on the camera thread (every 3 s while drawing)
+        # and on Flask threads (when the pen turns off, and on stop()). Two
+        # concurrent flushes both read `_saved_strokes`, both slice the same
+        # pending strokes, and both insert them - duplicating every annotation in
+        # MongoDB across the insert_many round trip.
+        #
+        # It cannot be `_lock`, because stop() holds `_lock` while joining the
+        # camera thread: a camera thread blocked on `_lock` inside a flush would
+        # deadlock the join. This one is only ever held by the flush itself.
+        self._flush_lock = threading.RLock()
         self.engine: GestureEngine | None = None
         self.dispatcher: CommandDispatcher | None = None
         self.session: dict | None = None
@@ -59,7 +90,7 @@ class EngineService:
         if the webcam is unavailable the presenter can still drive PowerPoint by
         voice, and both paths dispatch through the same CommandDispatcher.
         """
-        controller = PowerPointController()
+        controller = self._build_controller(options)
         self.dispatcher = CommandDispatcher(controller, AnnotationController())
         self.dispatcher.bind_presentation(
             current_slide=int(options.get("startSlide") or 1),
@@ -74,9 +105,43 @@ class EngineService:
             "userId": user_id,
             "presentationId": str(session_doc.get("presentationId") or ""),
             "presentationTitle": (presentation or {}).get("title", ""),
+            "totalSlides": int((presentation or {}).get("totalSlides") or 0),
+            # Which surface is being driven. The presentation window reads this to
+            # know whether it is the thing showing the slides.
+            "presentationMode": controller.name,
             "startedAt": time.time(),
         }
         multimodal_context.update_slide(self.dispatcher.current_slide)
+
+    def _build_controller(self, options: dict):
+        """Pick the presentation surface for this session.
+
+        Web by default. `presentationMode` is honoured when the caller asks for
+        PowerPoint explicitly, so an existing workflow that drives the installed
+        PowerPoint keeps working unchanged - but it is no longer what a presenter
+        gets by default, and none of the new presentation experience depends on it.
+
+        `PowerPointController` is imported **inside the branch that asks for it**,
+        not at module scope. That is not a micro-optimisation: importing it pulls
+        in `presentation_controller.keyboard` (PyAutoGUI) and
+        `presentation_controller.windows` (COM), and a web-mode process must be
+        able to demonstrate that it never loaded either. `tests/test_no_powerpoint.py`
+        asserts exactly that against `sys.modules`, which is only a meaningful
+        check if nothing imports them speculatively.
+        """
+        mode = str(options.get("presentationMode")
+                   or settings.PRESENTATION_MODE or MODE_WEB).strip().lower()
+        if mode in (MODE_POWERPOINT, "ppt", "com"):
+            from presentation_controller.powerpoint import PowerPointController
+
+            logger.info("Session will drive Microsoft PowerPoint (legacy mode).")
+            return PowerPointController()
+        # Bound to the bus here rather than inside the controller so the controller
+        # itself stays a plain object with no Flask or service imports - which is
+        # what lets the tests drive it with a list.
+        return WebPresentationController(
+            publish=bus.publish, publish_pointer=bus.publish_pointer,
+        )
 
     # --- lifecycle -----------------------------------------------------------
     def start(self, user_id: str, session_doc: dict, presentation: dict | None, preferences: dict,
@@ -99,6 +164,16 @@ class EngineService:
                 ),
                 debounce_frames=int(options.get("debounceFrames", settings.CV_DEBOUNCE_FRAMES)),
                 cooldown_ms=int(options.get("cooldownMs", settings.CV_COOLDOWN_MS)),
+                stabilizer_window=int(
+                    options.get("stabilizerWindow", settings.CV_STABILIZER_WINDOW)
+                ),
+                # 0 means "derive it from the debounce requirement"; see EngineConfig.
+                release_frames=int(
+                    options.get("releaseFrames", settings.CV_RELEASE_FRAMES)
+                ) or None,
+                pointer_smoothing=float(
+                    options.get("pointerSmoothing", settings.CV_POINTER_SMOOTHING)
+                ),
                 mirror=bool(options.get("mirror", True)),
                 preferences=preferences,
                 user_id=user_id,
@@ -111,6 +186,7 @@ class EngineService:
                 on_command=self._on_command,
                 on_event=bus.publish,
                 on_pointer=self._on_pointer,
+                on_pointer_lost=self._on_pointer_lost,
             )
             self.engine.start()
 
@@ -140,6 +216,12 @@ class EngineService:
                 raise EngineError("A session is already running. End it before starting a new one.")
             if self.dispatcher and self.session and self.session.get("userId") != user_id:
                 raise EngineError("A session belongs to another user.")
+            # Drop any engine left over from a crashed camera loop. `_bind_session`
+            # does not touch `self.engine`, so without this a voice-only session
+            # kept the dead one: status() reported its stale ERROR state instead of
+            # VOICE_ONLY, and `_count_command` incremented its counters, so the
+            # summary double-counted the previous session's commands.
+            self.engine = None
             self._bind_session(user_id, session_doc, presentation, options)
             bus.publish({"type": "state", **self.status()})
             return self.status()
@@ -153,7 +235,14 @@ class EngineService:
 
             if self.engine:
                 self.engine.stop()
-            self._flush_annotations()
+            # Whatever else happens, the session must not end with the mouse
+            # button still held down on the presenter's desktop.
+            if self.dispatcher:
+                try:
+                    self.dispatcher.end_stroke()
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("Could not lift the pen while stopping: %s", exc)
+            self._flush_annotations(close_active=True)
             counts = dict(self._offline_counts)
             if self.engine:
                 for command, count in self.engine.gesture_counts.items():
@@ -170,6 +259,20 @@ class EngineService:
             return summary
 
     def _teardown(self) -> None:
+        # A half-spoken command must not survive into the next talk: without this
+        # a session that ended mid-capture leaves the machine armed, and the first
+        # words of the next session become a command.
+        user_id = (self.session or {}).get("userId")
+        if user_id:
+            try:
+                # Imported here, not at module scope: voice_service imports this
+                # module, so a top-level import would be circular.
+                from services import voice_service
+
+                voice_service.reset_wake_session(user_id)
+            except Exception as exc:  # noqa: BLE001 - never block a teardown
+                logger.debug("Could not reset the wake session: %s", exc)
+
         self.engine = None
         self.dispatcher = None
         self.session = None
@@ -274,20 +377,49 @@ class EngineService:
             raise EngineError("This session belongs to another user.")
 
     # --- engine callbacks ----------------------------------------------------
-    def _on_command(self, command: str, payload: dict) -> None:
+    def _on_command(self, command: str, payload: dict) -> dict | None:
+        """Dispatch a gesture command and hand the outcome back to the engine.
+
+        The return value matters: the engine reconciles its mode against it, so a
+        command that was recognised but not delivered - the pen refused because
+        PowerPoint is not presenting - cannot leave the engine in a mode
+        PowerPoint was never put into.
+        """
         if not self.dispatcher:
-            return
+            return None
         record = self.dispatcher.execute(command, {**payload, "source": SOURCE_GESTURE})
         self._after_command(command, record, source=SOURCE_GESTURE)
+        return record
 
     def _after_command(self, command: str, record: dict, source: str) -> None:
-        if command == CLEAR_ANNOTATION:
+        # Only delete stored annotations if the erase actually reached PowerPoint.
+        # A refused Clear used to wipe the database anyway, so the ink vanished
+        # from VisionX while staying on the slide.
+        if command == CLEAR_ANNOTATION and record.get("delivered"):
             self._clear_persisted_annotations(record["slide"])
-        elif command == ANNOTATION_MODE and not record["annotationActive"]:
-            self._flush_annotations()
+        elif command == RESET_ANNOTATION:
+            # Reset does what both of the branches above do, because it is both
+            # things at once: the pen went off, and the ink was erased.
+            #
+            # The flush is terminal (close_active=True) and runs whichever way the
+            # erase went. Delivered, the dispatcher has already emptied its buffer,
+            # so it persists nothing and only lifts the pen. Refused - no slideshow
+            # to erase in - the ink is still on the slide and still in the buffer,
+            # and the flush is what stops the stroke the presenter had just drawn
+            # from being lost. The delete only follows a delivered erase, for the
+            # same reason Clear guards it: a refused erase must not wipe stored ink
+            # that is still on screen.
+            self._flush_annotations(close_active=True)
+            if record.get("delivered"):
+                self._clear_persisted_annotations(record["slide"])
 
         if self.dispatcher:
             multimodal_context.update_slide(self.dispatcher.current_slide)
+
+        # Every modality lands here, so this is the one place that can keep the
+        # camera engine's mode in step with a command it did not issue itself.
+        if self.engine:
+            self.engine.sync_mode(record)
 
         bus.publish({
             "type": "command",
@@ -303,13 +435,42 @@ class EngineService:
         # Persist finished strokes periodically so a crash mid-talk loses nothing.
         if mode == MODE_ANNOTATE and time.time() - self._last_pointer_persist > 3.0:
             self._last_pointer_persist = time.time()
+            # Periodic: persist what is finished, do not interrupt the live stroke.
             self._flush_annotations()
 
+    def _on_pointer_lost(self) -> None:
+        """The drawing hand left the frame - lift the pen and close the stroke.
+
+        Without this the mouse button stays held down after the hand goes away and
+        PowerPoint keeps drawing a line to wherever the cursor drifts next.
+        """
+        if not self.dispatcher:
+            return
+        try:
+            self.dispatcher.end_stroke()
+        except Exception as exc:  # noqa: BLE001 - never break the camera loop
+            logger.warning("Could not end the stroke cleanly: %s", exc)
+
     # --- annotation persistence ---------------------------------------------
-    def _flush_annotations(self) -> None:
+    def _flush_annotations(self, close_active: bool = False) -> None:
+        with self._flush_lock:
+            self._flush_annotations_locked(close_active)
+
+    def _flush_annotations_locked(self, close_active: bool = False) -> None:
+        """Persist completed strokes.
+
+        `close_active` is False for the periodic flush, and that matters: ending
+        the stroke in progress every 3 seconds chopped every annotation longer
+        than 3 seconds into disjoint fragments, because `begin()` restarts the
+        next one at a new point rather than continuing from the last. The periodic
+        flush is a crash-safety measure and has no business changing what the
+        presenter is drawing. Only a real end - mode change, hand gone, session
+        over - closes the active stroke.
+        """
         if not self.dispatcher or not self.session:
             return
-        self.dispatcher.annotations.end()
+        if close_active:
+            self.dispatcher.end_stroke()
         strokes = self.dispatcher.annotations.strokes()
         pending = strokes[self._saved_strokes:]
         if not pending:
@@ -330,6 +491,12 @@ class EngineService:
                     "points": stroke["points"],
                     "colour": stroke["colour"],
                     "width": stroke["width"],
+                    # The fingertip, normalised over the CAMERA frame - not over
+                    # the slide. Whoever draws this applies the reach margin.
+                    # Recorded rather than assumed, because mouse strokes arrive
+                    # through annotation_service in the slide's own space and the
+                    # two are indistinguishable once stored.
+                    "space": SPACE_CAMERA,
                 },
                 "createdAt": datetime.now(timezone.utc),
             }
@@ -348,6 +515,12 @@ class EngineService:
             logger.warning("Could not persist annotations: %s", exc)
 
     def _clear_persisted_annotations(self, slide: int) -> None:
+        # Shares the flush lock: it rewrites `_saved_strokes`, so it must not
+        # interleave with a flush that is mid-insert.
+        with self._flush_lock:
+            self._clear_persisted_annotations_locked(slide)
+
+    def _clear_persisted_annotations_locked(self, slide: int) -> None:
         if not self.session or not self.session.get("presentationId"):
             return
         try:

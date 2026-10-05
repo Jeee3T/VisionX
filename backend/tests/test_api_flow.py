@@ -118,6 +118,23 @@ def run() -> int:
 
         response = client.get(f"/api/presentations/{presentation_id}/slides/1", headers=auth)
         check("slide preview served", response.status_code == 200 and response.mimetype == "image/png")
+        thumbnail_bytes = len(response.data)
+
+        # The presentation window's own render path: a full-resolution slide,
+        # which is what the audience sees. Distinct from the preview above -
+        # putting a 1.6x thumbnail on a projector is what made a deck look blurry.
+        response = client.get(
+            f"/api/presentations/{presentation_id}/render/1?w=1920", headers=auth)
+        check("presentation-resolution slide rendered",
+              response.status_code == 200 and response.mimetype == "image/png",
+              # Never decoded as text: a successful response here is a PNG.
+              f"status={response.status_code} type={response.mimetype}")
+        check("the render is larger than the library thumbnail",
+              len(response.data) > thumbnail_bytes, f"{len(response.data)} vs {thumbnail_bytes}")
+
+        response = client.get(
+            f"/api/presentations/{presentation_id}/render/99", headers=auth)
+        check("a slide past the end of the deck is refused", response.status_code == 404)
 
         response = client.get("/api/presentations", headers=auth)
         check("library lists the upload", response.json["data"]["count"] == 1)
@@ -128,6 +145,8 @@ def run() -> int:
         other_auth = {"Authorization": f"Bearer {other.json['data']['token']}"}
         response = client.get(f"/api/presentations/{presentation_id}", headers=other_auth)
         check("another user cannot read the presentation", response.status_code == 404)
+        response = client.get(f"/api/presentations/{presentation_id}/render/1", headers=other_auth)
+        check("another user cannot render this deck's slides", response.status_code == 404)
 
         print("\n5. Session lifecycle")
         response = client.post("/api/sessions", headers=auth, json={"presentationId": presentation_id})
@@ -303,6 +322,19 @@ def run() -> int:
             check("voice-only session reports no camera",
                   response.json["data"]["engine"]["cameraActive"] is False)
 
+            # The architectural change, asserted over HTTP: a session drives the
+            # VisionX presentation window, not the PowerPoint on this machine.
+            engine_state = response.json["data"]["engine"]
+            check("the session drives the web presentation surface",
+                  engine_state["controller"]["controller"] == "web",
+                  str(engine_state.get("controller")))
+            check("no OS automation is involved",
+                  engine_state["controller"].get("automation") == "none",
+                  str(engine_state.get("controller")))
+            check("every command is available on the web surface",
+                  len(engine_state["controller"]["capabilities"]) == 13,
+                  str(engine_state["controller"]["capabilities"]))
+
             response = client.post("/api/voice/interpret", headers=auth,
                                    json={"text": "go to slide 2", "sessionId": voice_session_id})
             decision = response.json["data"]
@@ -337,6 +369,66 @@ def run() -> int:
             check("slide unchanged after ordinary speech", status["currentSlide"] == 3,
                   str(status.get("currentSlide")))
 
+            # --- continuous listening: "Vision <command> OK" -----------------
+            # Same session, same dispatcher. The wake-word machine only decides
+            # *when* there is a command; everything after it is unchanged.
+            client.post("/api/voice/wake/reset", headers=auth)
+
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "as you can see revenue grew twelve percent",
+                                         "sessionId": voice_session_id})
+            segment = response.json["data"]
+            check("continuous listening ignores ordinary speech",
+                  segment["executed"] is False and segment["wake"]["action"] == "IDLE",
+                  response.get_data(as_text=True))
+
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "next slide please",
+                                         "sessionId": voice_session_id})
+            check("a command phrase without the wake word does nothing",
+                  response.json["data"]["executed"] is False)
+
+            status = client.get("/api/engine/status", headers=auth).json["data"]
+            check("slide unchanged by ordinary speech in continuous mode",
+                  status["currentSlide"] == 3, str(status.get("currentSlide")))
+
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "vision go to slide 2 ok",
+                                         "sessionId": voice_session_id})
+            segment = response.json["data"]
+            check("'Vision <command> OK' executes immediately",
+                  segment["executed"] is True, response.get_data(as_text=True))
+            check("the captured command is what the model classified",
+                  segment["wake"]["command"] == "go to slide 2" and
+                  segment["command"] == "GO_TO_SLIDE", str(segment.get("wake")))
+            check("continuous command moved the deck",
+                  segment["result"]["currentSlide"] == 2, str(segment.get("result")))
+
+            response = client.get("/api/voice/wake", headers=auth)
+            check("listening resumes after a command",
+                  response.json["data"]["state"] == "LISTENING",
+                  response.get_data(as_text=True))
+
+            # The same command split across recorder segments must behave identically.
+            client.post("/api/voice/stream/text", headers=auth,
+                        json={"text": "vision", "sessionId": voice_session_id})
+            response = client.get("/api/voice/wake", headers=auth)
+            check("the wake word arms command mode",
+                  response.json["data"]["state"] == "CAPTURING")
+
+            client.post("/api/voice/stream/text", headers=auth,
+                        json={"text": "go to slide 1", "sessionId": voice_session_id})
+            response = client.post("/api/voice/stream/text", headers=auth,
+                                   json={"text": "ok", "sessionId": voice_session_id})
+            segment = response.json["data"]
+            check("a command split across segments executes on the terminator",
+                  segment["executed"] is True and segment["result"]["currentSlide"] == 1,
+                  response.get_data(as_text=True))
+
+            # Put the deck back where the assertions below expect it.
+            client.post("/api/engine/command", headers=auth,
+                        json={"command": "GO_TO_SLIDE", "parameters": {"slideNumber": 3}})
+
             # The control bar and voice share one dispatcher and one set of counters.
             response = client.post("/api/engine/command", headers=auth,
                                    json={"command": "GO_TO_SLIDE", "parameters": {"slideNumber": 2}})
@@ -354,9 +446,9 @@ def run() -> int:
 
         response = client.get("/api/engine/commands", headers=auth)
         commands = response.json["data"]["commands"]
-        check("command catalogue exposes 12 commands", len(commands) == 12)
-        check("exactly five commands are pose-bindable",
-              sum(1 for row in commands if row["bindable"]) == 5)
+        check("command catalogue exposes 13 commands", len(commands) == 13)
+        check("exactly six commands are pose-bindable",
+              sum(1 for row in commands if row["bindable"]) == 6)
 
         print("\n11. Profile")
         response = client.put("/api/users/me", headers=auth, json={"name": "Renamed User"})

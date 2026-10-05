@@ -9,6 +9,7 @@ import Library from './pages/Library'
 import UploadPresentation from './pages/UploadPresentation'
 import PresentationDetails from './pages/PresentationDetails'
 import Session from './pages/Session'
+import Present from './pages/Present'
 import GestureSettings from './pages/GestureSettings'
 import GestureTraining from './pages/GestureTraining'
 import VoiceAssistant from './pages/VoiceAssistant'
@@ -41,6 +42,11 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         {/* The session screen owns the whole viewport - no app chrome around it. */}
         <Route path="/session/new" element={<Session />} />
+
+        {/* The presentation window. Opened in its own browser window by the
+            session screen and put on the projector, so it is deliberately
+            outside AppLayout: an audience must never see VisionX's sidebar. */}
+        <Route path="/present" element={<Present />} />
 
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />

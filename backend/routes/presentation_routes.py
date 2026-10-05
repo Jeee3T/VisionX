@@ -1,5 +1,6 @@
 from flask import Blueprint, g, request, send_file
 
+from config.settings import settings
 from middleware.auth import require_auth
 from services import presentation_service
 from utils.responses import success
@@ -61,6 +62,24 @@ def slide_image(presentation_id, slide_number):
     to_object_id(presentation_id, "presentation id")
     path = presentation_service.thumbnail_path(g.user_id, presentation_id, slide_number)
     return send_file(path, mimetype="image/png", max_age=3600)
+
+
+@presentation_bp.get("/<presentation_id>/render/<int:slide_number>")
+@require_auth
+def render(presentation_id, slide_number):
+    """One slide at presentation resolution. This is what the audience sees.
+
+    Cached on disk by (slide, width) and served with a long max-age: a deck is
+    immutable once uploaded, so the presentation window can prefetch neighbouring
+    slides and have them already in the browser cache when the presenter arrives.
+    """
+    to_object_id(presentation_id, "presentation id")
+    try:
+        width = int(request.args.get("w") or settings.SLIDE_RENDER_WIDTH)
+    except (TypeError, ValueError):
+        width = settings.SLIDE_RENDER_WIDTH
+    path = presentation_service.render_path(g.user_id, presentation_id, slide_number, width)
+    return send_file(path, mimetype="image/png", max_age=86400)
 
 
 @presentation_bp.get("/<presentation_id>/file")

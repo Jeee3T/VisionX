@@ -8,6 +8,24 @@ class. VisionX does not claim Slides support until such a class actually exists.
 
 from abc import ABC, abstractmethod
 
+# --- readiness vocabulary -----------------------------------------------------
+# Defined here, on the interface, rather than in the Windows/PowerPoint layer
+# that happens to be the only implementation which can return DENIED.
+#
+# The direction of this dependency matters. When these lived in
+# `presentation_controller.windows`, every controller that wanted to describe its
+# own readiness - including the PowerPoint-free web one - had to import the
+# PowerPoint COM module to name a string. `windows.py` re-exports them, so the
+# platform layer depends on the interface and not the other way round.
+#
+# The distinction between DENIED and UNKNOWN is the whole point for a controller
+# that drives another application: DENIED is "the app told us it is not ready,
+# do not send that shortcut", UNKNOWN is "we could not ask". A controller that IS
+# the presentation surface is always CONFIRMED, because there is nothing to ask.
+SLIDESHOW_CONFIRMED = "CONFIRMED"
+SLIDESHOW_DENIED = "DENIED"
+SLIDESHOW_UNKNOWN = "UNKNOWN"
+
 
 class PresentationControlError(RuntimeError):
     """Raised when the OS-level control layer is unavailable."""
@@ -65,6 +83,24 @@ class PresentationController(ABC):
 
     def whiteout(self) -> None:
         self._unsupported("whiting out the screen")
+
+    # --- pen strokes ----------------------------------------------------------
+    # Drawing is a drag, not a move: a controller that can annotate needs to hold
+    # a button down between `pen_down` and `pen_up`. No-ops by default so a
+    # controller that draws some other way is still a valid implementation.
+    def pen_down(self) -> None:
+        """Begin a stroke at the current pointer position."""
+
+    def pen_up(self) -> None:
+        """End the stroke in progress, if any."""
+
+    @property
+    def pen_is_down(self) -> bool:
+        return False
+
+    def slideshow_state(self) -> str:
+        """CONFIRMED / DENIED / UNKNOWN - is this controller ready to present?"""
+        return SLIDESHOW_UNKNOWN
 
     def capabilities(self) -> set[str]:
         """Command names this controller can actually deliver."""

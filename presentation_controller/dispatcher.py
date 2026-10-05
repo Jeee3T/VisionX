@@ -5,6 +5,7 @@ and only the controller below it talks to PyAutoGUI.
 """
 
 import logging
+import threading
 import time
 
 from computer_vision.command_mapping.gesture_mapper import (
@@ -18,6 +19,7 @@ from computer_vision.command_mapping.gesture_mapper import (
     LAST_SLIDE,
     NEXT_SLIDE,
     PREVIOUS_SLIDE,
+    RESET_ANNOTATION,
     START_PRESENTATION,
     VIRTUAL_POINTER,
     WHITEOUT,
@@ -30,6 +32,13 @@ logger = logging.getLogger(__name__)
 
 class CommandDispatcher:
     def __init__(self, controller: PresentationController, annotations: AnnotationController | None = None):
+        # Two threads reach this object: the camera loop (gestures, and the
+        # pointer/pen stream at frame rate) and Flask request threads (voice, the
+        # control bar, the keyboard fallback). Every mutating entry point is
+        # serialised here, because they share one PowerPointController and one
+        # mouse button - and an interleaved pen_down/pen_up loses the release,
+        # stranding the physical button down on the presenter's desktop.
+        self._lock = threading.RLock()
         self.controller = controller
         self.annotations = annotations or AnnotationController()
         self.current_slide = 1
@@ -66,7 +75,10 @@ class CommandDispatcher:
         payload = payload or {}
         if command not in ALL_COMMANDS:
             raise ValueError(f"Unknown command '{command}'")
+        with self._lock:
+            return self._execute_locked(command, payload)
 
+    def _execute_locked(self, command: str, payload: dict) -> dict:
         parameters = dict(payload.get("parameters") or {})
         source = str(payload.get("source") or "gesture")
         delivered = True
@@ -87,6 +99,15 @@ class CommandDispatcher:
             delivered = False
             message = f"Invalid parameters for {command}: {exc}"
             logger.warning("Command %s rejected: %s", command, message)
+        except Exception as exc:  # noqa: BLE001
+            # Anything else the OS input layer can throw - PyAutoGUI raising an
+            # OSError after the display went away, a COM error the bridge did not
+            # convert. This is the only place a VisionX command becomes a key
+            # press, and a failure to deliver one is a reportable outcome, not a
+            # 500 for the browser or a dead camera loop.
+            delivered = False
+            message = f"{command} could not be delivered: {exc}"
+            logger.exception("Command %s failed unexpectedly", command)
 
         record = {
             "command": command,
@@ -126,6 +147,7 @@ class CommandDispatcher:
             VIRTUAL_POINTER: self._handle_pointer,
             ANNOTATION_MODE: self._handle_annotation,
             CLEAR_ANNOTATION: self._handle_clear,
+            RESET_ANNOTATION: self._handle_reset,
             START_PRESENTATION: self._handle_start,
             END_PRESENTATION: self._handle_end,
             BLACKOUT: self._handle_blackout,
@@ -190,33 +212,119 @@ class CommandDispatcher:
             self.slides_navigated += 1
 
     def _handle_pointer(self, parameters: dict) -> None:
-        state = parameters.get("state")
-        self.pointer_active = (not self.pointer_active) if state is None else bool(state)
-        if self.pointer_active and self.annotation_active:
-            self.annotation_active = False
+        """Virtual pointer on/off.
+
+        `state` absent means toggle (a gesture); `state` present means set (voice,
+        and the engine, which sends the state it has just computed so the two can
+        never disagree about which way the toggle went).
+        """
+        target = (not self.pointer_active) if parameters.get("state") is None \
+            else bool(parameters["state"])
+        if target and self.annotation_active:
+            # Leaving annotation mode always closes the stroke in progress.
             self.annotations.end()
-        self.controller.set_pointer(self.pointer_active)
+        try:
+            self.controller.set_pointer(target)
+        finally:
+            # As with the pen: report what happened, not what was asked for.
+            self._sync_from_controller(
+                pointer=target, annotation=False if target else None,
+            )
+        if not self.annotation_active:
+            # Turning the pointer *off* also leaves pen mode (the arrow is not the
+            # pen), so the stroke in progress has to be closed here too - exactly
+            # as `_handle_annotation` does. Without this the buffer kept
+            # `is_drawing` True while the mode was off, and `stream_pointer`'s
+            # `if not is_drawing` guard then never issued `pen_down` again: the
+            # pen moved across the slide for the rest of the session without
+            # leaving a mark.
+            self.annotations.end()
 
     def _handle_annotation(self, parameters: dict) -> None:
-        state = parameters.get("state")
-        self.annotation_active = (not self.annotation_active) if state is None else bool(state)
-        if self.annotation_active and self.pointer_active:
-            self.pointer_active = False
-        self.controller.set_annotation(self.annotation_active)
+        target = (not self.annotation_active) if parameters.get("state") is None \
+            else bool(parameters["state"])
+        try:
+            self.controller.set_annotation(target)
+        finally:
+            # Even when the controller refuses - no slideshow, so no pen - the
+            # dispatcher must end up describing what actually happened, not what
+            # was asked for. `_sync_from_controller` reads the truth back.
+            self._sync_from_controller(
+                pointer=False if target else None, annotation=target,
+            )
         if not self.annotation_active:
             self.annotations.end()
 
     def _handle_clear(self, _parameters: dict) -> None:
-        self.annotations.clear(self.current_slide)
+        # Erase in PowerPoint FIRST. `clear_annotation` refuses when no slideshow
+        # is running, and dropping our own buffer before finding that out threw
+        # away ink that is still on the slide - the presenter loses annotations
+        # and nothing is erased.
         self.controller.clear_annotation()
-        self.annotation_active = False
-        self.pointer_active = False
+        self.annotations.clear(self.current_slide)
+        # Erasing ink is not a mode change: PowerPoint stays in whatever pointer
+        # mode it was in. Claiming otherwise is what previously left the pen on in
+        # PowerPoint while VisionX reported it off.
+        self._sync_from_controller()
+
+    def _handle_reset(self, _parameters: dict) -> None:
+        """Back to the default state: no pen, no pointer, no ink.
+
+        The one command a presenter can reach for when they have lost track of
+        which mode they are in. Unlike CLEAR_ANNOTATION - which erases the ink and
+        deliberately leaves the pen armed - this leaves both modes as well, so the
+        next gesture is interpreted against a known state.
+
+        Modes come off *before* the erase, because the erase is the part that can
+        refuse (PowerPoint will not erase without a running slideshow) and exiting
+        the mode is the part the presenter actually asked for. A refused erase
+        still reports itself, but it can no longer strand the pen armed.
+        """
+        # Release the physical button first, or PowerPoint keeps drawing a line to
+        # wherever the cursor goes next.
+        self.controller.pen_up()
+        self.annotations.end()
+        try:
+            self.controller.set_annotation(False)
+            self.controller.set_pointer(False)
+        finally:
+            self._sync_from_controller(pointer=False, annotation=False)
+
+        # Same ordering as _handle_clear: erase on the slide first, and only drop
+        # our own buffer once we know the ink is really gone.
+        self.controller.clear_annotation()
+        self.annotations.clear(self.current_slide)
+
+    def _sync_from_controller(self, pointer: bool | None = None,
+                              annotation: bool | None = None) -> None:
+        """Adopt the controller's pointer/pen state as the dispatcher's own.
+
+        The controller talks to PowerPoint, so it is the only layer that knows
+        whether a mode change actually took effect. Mirroring it here - rather
+        than tracking a parallel copy that a refused command silently invalidates -
+        is what stops the UI claiming the pen is on when PowerPoint disagrees.
+
+        `pointer` / `annotation` are the states the caller *asked* for. They are
+        used only for a controller that does not publish its own state, so a
+        minimal PresentationController implementation still toggles correctly.
+        """
+        reported_pointer = getattr(self.controller, "pointer_active", None)
+        reported_annotation = getattr(self.controller, "annotation_active", None)
+
+        resolved_pointer = reported_pointer if reported_pointer is not None else pointer
+        resolved_annotation = reported_annotation if reported_annotation is not None else annotation
+
+        if resolved_pointer is not None:
+            self.pointer_active = bool(resolved_pointer)
+        if resolved_annotation is not None:
+            self.annotation_active = bool(resolved_annotation)
 
     def _handle_start(self, _parameters: dict) -> None:
         self.controller.start_presentation()
         self.blank_screen = None
 
     def _handle_end(self, _parameters: dict) -> None:
+        self.annotations.end()
         self.controller.end_presentation()
         self.blank_screen = None
         self.pointer_active = False
@@ -232,13 +340,40 @@ class CommandDispatcher:
 
     # --- pointer / drawing stream -------------------------------------------
     def stream_pointer(self, x: float, y: float) -> None:
-        """Called every frame while pointer or annotation mode is active."""
-        if self.pointer_active or self.annotation_active:
+        """Called every frame while pointer or annotation mode is active.
+
+        The ordering here is what makes the PowerPoint pen actually draw:
+
+            move to the first point  ->  press the button  ->  keep moving
+
+        PowerPoint draws on a *drag*. Streaming positions with no button held -
+        which is what this method used to do - walks the pen across the slide and
+        leaves nothing behind. Pressing the button before the first move would
+        instead draw a line in from wherever the cursor happened to be.
+        """
+        with self._lock:
+            if not (self.pointer_active or self.annotation_active):
+                return
+
             self.controller.move_pointer(x, y)
-        if self.annotation_active:
+
+            if not self.annotation_active:
+                return
+
             if not self.annotations.is_drawing:
                 self.annotations.begin(self.current_slide)
+                # The cursor is now on the first point of the stroke, so the
+                # button can go down without dragging in from the previous
+                # position.
+                self.controller.pen_down()
             self.annotations.add_point(x, y)
+
+    def end_stroke(self):
+        """Lift the pen and close the stroke - the hand left the frame, or the
+        presenter switched modes. Idempotent; returns the finished Stroke, if any."""
+        with self._lock:
+            self.controller.pen_up()
+            return self.annotations.end()
 
     def state(self) -> dict:
         return {

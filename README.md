@@ -5,32 +5,40 @@
 Control a presentation with your hands or your voice, using a standard webcam and microphone — no
 clicker, no sensor glove, no depth camera. VisionX detects hand landmarks with MediaPipe, classifies
 them (either geometrically or with a model trained on *your* hands), transcribes speech locally with
-Whisper, classifies what you said with a VisionX-trained intent model, and drives PowerPoint through
-real key presses.
+Whisper, classifies what you said with a VisionX-trained intent model, and drives the presentation
+it is showing in its own dedicated window.
 
-Both modalities converge on **one** command pipeline. Neither can reach PowerPoint any other way.
+Both modalities converge on **one** command pipeline. Neither can reach the presentation any other
+way.
 
 ```
-  webcam ─► OpenCV ─► MediaPipe ─► recognizer ─► intent gate ─┐
-                                   (geometric OR              │
-                                    personalized MLP)         │
-                                                              ├─► debouncer ─► gesture mapper ─┐
-                                                              │                                │
-                                                              ┘                                ▼
-                                                                                        CommandIntent
-                                                                                       {source, intent,
-   microphone ─► Whisper (STT) ─► intent classifier ─► parameter extraction ─────────►   parameters,
-                 pretrained       VisionX-trained       confidence gate                  confidence}
-                                                                                                │
-                                                                                                ▼
-                                                                                       CommandDispatcher
-                                                                                                │
-                                                                                                ▼
-                                                                                    PowerPointController
-                                                                                        (PyAutoGUI)
-                     ↕
-         Flask REST API ↔ MongoDB ↔ React frontend (SSE live telemetry)
+  webcam ─► OpenCV ─► MediaPipe ─► recognizer ─► intent gate ─► stabilizer ─┐
+                                   (geometric OR         per-frame  5-frame  │
+                                    personalized MLP)     ambiguity   vote   │
+                                                                             ├─► debouncer ─► mapper ─┐
+                                                                             │   hold · release ·     │
+                                                                             ┘   cooldown             ▼
+                                                                                              CommandIntent
+                                                                                             {source, intent,
+   microphone ─► Whisper (STT) ─► wake word ─► intent classifier ─► parameters ───────────►    parameters,
+    continuous    pretrained     "Vision…OK"   VisionX-trained    confidence gate              confidence}
+                                                                                                      │
+                                                                                                      ▼
+                                                                                             CommandDispatcher
+                                                                                                      │
+                                                                                                      ▼
+                                                                                      WebPresentationController
+                                                                                       (default; no automation)
+                                                                                                      │
+                                                                                                      ▼
+                                                                                        presentation window ─┐
+                     ↕                                                                                       │
+         Flask REST API ↔ MongoDB ↔ React frontend  ◄── SSE: telemetry + a coalesced pointer channel ────────┘
 ```
+
+`WebPresentationController` is one implementation of `PresentationController`; `PowerPointController`
+(COM + PyAutoGUI + the slideshow guard) is the other, still shipped and selectable with
+`VISIONX_PRESENTATION_MODE=powerpoint`. Nothing above the interface knows which one is running.
 
 **Three kinds of component, never conflated:**
 
@@ -38,45 +46,68 @@ Both modalities converge on **one** command pipeline. Neither can reach PowerPoi
 | --- | --- | --- |
 | **Pretrained, third-party** | MediaPipe hand landmarker · Whisper speech-to-text | `computer_vision/hand_detection/` · `voice_assistant/speech/` |
 | **Trained by VisionX** | personalized gesture MLP · voice intent classifier | `computer_vision/ml/` · `voice_assistant/intent/` |
-| **Rule-based** | geometric recognizer · debouncer · intent gate · parameter extraction · dispatcher | `computer_vision/gesture_recognition/` · `computer_vision/ml/intent_gate.py` · `voice_assistant/intent/parameters.py` · `presentation_controller/` |
+| **Rule-based** | geometric recognizer · stabilizer · debouncer · intent gate · wake word · parameter extraction · dispatcher · web presentation controller | `computer_vision/gesture_recognition/` · `computer_vision/ml/intent_gate.py` · `voice_assistant/wake/` · `voice_assistant/intent/parameters.py` · `presentation_controller/` |
 
 ---
 
 ## 1. What it does
 
+> ### Web Presentation Mode is fully PowerPoint-independent
+>
+> VisionX **is** the presentation engine. In the default web mode, Microsoft PowerPoint is never
+> opened, controlled, focused, or required: no keystrokes, no mouse synthesis, no COM, no PyAutoGUI.
+> A command changes VisionX's own presentation state and the presentation window redraws.
+>
+> **The only remaining rendering dependency is a headless converter at upload time** — LibreOffice
+> (`soffice`), used once to turn a `.pptx` into a PDF. A `.pdf` upload needs nothing at all. Nothing
+> is required at presentation time: by then the deck is a set of PNGs on disk. See §2 and §4.
+
+VisionX presents your deck itself, in a dedicated presentation window you put on the projector. See
+§4 for what that changed and why.
+
 | Gesture (default pose)      | Command             | Effect                                  |
 | --------------------------- | ------------------- | --------------------------------------- |
-| Pinky only                  | `NEXT_SLIDE`        | Right Arrow → next slide                |
-| Thumb only                  | `PREVIOUS_SLIDE`    | Left Arrow → previous slide             |
-| Index + middle              | `VIRTUAL_POINTER`   | Toggles the laser pointer, cursor follows your fingertip |
-| Index only                  | `ANNOTATION_MODE`   | Toggles the pen; your fingertip draws   |
-| Index + middle + ring       | `CLEAR_ANNOTATION`  | Erases the ink on the current slide     |
+| Pinky only                  | `NEXT_SLIDE`        | Next slide in the presentation window   |
+| Thumb only                  | `PREVIOUS_SLIDE`    | Previous slide                          |
+| Index + middle              | `VIRTUAL_POINTER`   | Toggles the pointer; the on-slide dot follows your fingertip at frame rate |
+| Index only                  | `ANNOTATION_MODE`   | Toggles the pen; your fingertip draws on the slide canvas |
+| Index + middle + ring       | `CLEAR_ANNOTATION`  | Erases the ink on the current slide, leaving the pen as it was |
+| Open palm                   | `RESET_ANNOTATION`  | Back to the default state: erases the ink **and** leaves pen and pointer mode |
 
 Poses are **not hardcoded to commands** — every binding lives in the user's `GesturePreferences`
 document and can be reassigned in the UI. A saved remap applies to a running session immediately.
 
+`CLEAR_ANNOTATION` and `RESET_ANNOTATION` differ in exactly one thing, and it is the reason both
+exist: Clear erases the ink and deliberately leaves the pen armed, so you can carry on drawing on a
+clean slide. Reset erases the ink and leaves pen *and* pointer mode, so whatever mode you had lost
+track of, an open palm puts you back at a known state. It computes no toggle — repeating it cannot
+make things worse — and it never moves the deck.
+
 Seven more commands exist that a pose cannot express, because they take a parameter or are awkward
 to hold a hand still for. Voice, the on-screen control bar and the keyboard fallback can all issue
-them, and every one is a real PowerPoint shortcut:
+them:
 
-| Command | Parameters | PowerPoint |
+| Command | Parameters | Effect |
 | --- | --- | --- |
-| `GO_TO_SLIDE` | `slideNumber` | type the digits, then Enter |
-| `FIRST_SLIDE` / `LAST_SLIDE` | — | Home / End |
-| `START_PRESENTATION` / `END_PRESENTATION` | — | F5 / Esc |
-| `BLACKOUT` / `WHITEOUT` | — | `B` / `W` |
+| `GO_TO_SLIDE` | `slideNumber` | jump to a slide, refused rather than clamped if it does not exist |
+| `FIRST_SLIDE` / `LAST_SLIDE` | — | first / last slide |
+| `START_PRESENTATION` / `END_PRESENTATION` | — | enter / leave presentation mode |
+| `BLACKOUT` / `WHITEOUT` | — | black / white screen |
 
 ### Voice
 
-Hold the microphone button, say the command, release:
+Turn the microphone on once at the start of the talk. From then on, say **"Vision"**, the command,
+then **"OK"** — with no interaction with the web app at any point:
 
-> "next slide" · "go back two slides" · "go to slide seven" · "show me slide ten" ·
-> "back to the beginning" · "black screen" · "turn on the pen" · "erase the ink" ·
-> "start the presentation"
+> "Vision **next slide** OK" · "Vision **go back two slides** OK" · "Vision **go to slide seven** OK" ·
+> "Vision **back to the beginning** OK" · "Vision **black screen** OK" · "Vision **turn on the pen** OK" ·
+> "Vision **erase the ink** OK" · "Vision **start the presentation** OK"
 
-Anything else — "as you can see on this slide, revenue grew twelve percent" — is classified as
-**not a command** and ignored. That is the whole difficulty of the problem, and it is what §6
-is about.
+Anything you say that is not framed that way — "as you can see on this slide, revenue grew twelve
+percent", or even "next slide please" — never reaches the intent model. And a phrase that *is*
+framed that way still has to clear the classifier's confidence gate, so a wake word picked up by
+accident cannot move the deck either. That is the whole difficulty of the problem, and it is what
+§6 and §7 are about.
 
 ---
 
@@ -85,30 +116,83 @@ is about.
 - **Python 3.11 – 3.13** (3.13 verified)
 - **Node.js 18+** (24 verified)
 - **MongoDB** — MongoDB Atlas, or a local `mongod` for development
-- A webcam, and Microsoft PowerPoint on the machine that runs the backend (that is the machine whose
-  keyboard VisionX drives)
+- A webcam
+- **To upload a `.pptx`/`.ppt`: LibreOffice** on the machine that runs the backend. It is invoked
+  headlessly, once per upload, to convert the deck to PDF so VisionX can render its slides.
+  - Windows: <https://www.libreoffice.org/download/> — or set `VISIONX_SOFFICE_PATH` if it is
+    installed somewhere unusual.
+  - **Microsoft Office is not required.** PowerPoint COM remains only as an optional legacy
+    fallback, tried *after* LibreOffice and never launched when LibreOffice can do the job. Pin it
+    off entirely with `VISIONX_PPTX_CONVERTER=libreoffice`.
+  - A **`.pdf` upload needs no converter at all** — the shortest PowerPoint-free path.
+- **Nothing is required at presentation time.** Conversion happens at upload; the presentation
+  itself runs entirely inside VisionX from rendered images.
+
+`GET /api/health` reports `pptxConverter.ready`, so you can check this before your first upload
+rather than discovering it from a deck that produced no slides.
 
 ### Platform support
 
-**Windows is the supported and verified target.** VisionX drives PowerPoint by sending real key
-presses through PyAutoGUI, and the key codes in `presentation_controller/powerpoint.py` are the
-**Windows** PowerPoint shortcuts. They are not the same on macOS, so the table below is honest about
-what does and does not work off a fresh checkout.
+**Windows is the supported and verified target**, and VisionX is built as a Windows application
+rather than a cross-platform one that happens to run there.
 
-| Command | Key sent | Windows | macOS | Linux |
+Since the presentation moved into VisionX's own window (§4), **the table below no longer describes
+the default configuration.** In web mode nothing is automated: there are no keystrokes, no mouse
+synthesis and no COM, so every command works identically on every platform and the whole column of
+macOS/Linux caveats stops applying. What remains Windows-specific is the surrounding environment —
+camera and microphone access, and the PowerPoint COM path used *once per upload* to convert a
+`.pptx` to PDF.
+
+The table is retained because the PowerPoint controller is still shipped and still selectable
+(`VISIONX_PRESENTATION_MODE=powerpoint`), for a presenter who genuinely wants VisionX to drive the
+PowerPoint on their own machine.
+
+| Command | On Windows | Keystroke fallback | macOS | Linux |
 | --- | --- | --- | --- | --- |
-| `NEXT_SLIDE` | `Right` | works | works | X11 only |
-| `PREVIOUS_SLIDE` | `Left` | works | works | X11 only |
-| `GO_TO_SLIDE` | digits + `Enter` | works | works | X11 only |
-| `FIRST_SLIDE` | `Home` | works | needs `Fn`+`Left`; most Mac keyboards have no `Home` | X11 only |
-| `LAST_SLIDE` | `End` | works | needs `Fn`+`Right` | X11 only |
-| `START_PRESENTATION` | `F5` | works | **does not work** — macOS uses `Cmd`+`Shift`+`Return` | X11 only |
-| `END_PRESENTATION` | `Esc` | works | works | X11 only |
-| `BLACKOUT` / `WHITEOUT` | `B` / `W` | works | works | X11 only |
-| `VIRTUAL_POINTER` | `Ctrl`+`L` | works | **does not work** — macOS uses `Cmd`+`L` | X11 only |
-| `ANNOTATION_MODE` | `Ctrl`+`P` | works | **does not work** — macOS uses `Cmd`+`P` | X11 only |
-| pointer/pen off | `Ctrl`+`A` | works | **does not work** — macOS uses `Cmd`+`A` | X11 only |
-| `CLEAR_ANNOTATION` | `E` | works | **does not work** — macOS uses `Shift`+`E` | X11 only |
+| `NEXT_SLIDE` | `View.Next()` | `Right` | works | X11 only |
+| `PREVIOUS_SLIDE` | `View.Previous()` | `Left` | works | X11 only |
+| `GO_TO_SLIDE` | `View.GotoSlide(n)` | digits + `Enter` | works | X11 only |
+| `FIRST_SLIDE` | `View.GotoSlide(1)` | `Home` | needs `Fn`+`Left` | X11 only |
+| `LAST_SLIDE` | `View.GotoSlide(count)` | `End` | needs `Fn`+`Right` | X11 only |
+| `START_PRESENTATION` | `F5` | `F5` | **no** — macOS uses `Cmd`+`Shift`+`Return` | X11 only |
+| `END_PRESENTATION` | `Esc` | `Esc` | works | X11 only |
+| `BLACKOUT` / `WHITEOUT` | `B` / `W` | `B` / `W` | works | X11 only |
+| `VIRTUAL_POINTER` | `PointerType = Arrow` + real mouse | `Ctrl`+`L` | **no** — macOS uses `Cmd`+`L` | X11 only |
+| `ANNOTATION_MODE` | `PointerType = Pen` | `Ctrl`+`P` **(guarded)** | **no** — macOS uses `Cmd`+`P` | X11 only |
+| drawing | mouse button held while moving | same | same | X11 only |
+| pointer/pen off | `PointerType = Arrow` | `Ctrl`+`A` | **no** — macOS uses `Cmd`+`A` | X11 only |
+| `CLEAR_ANNOTATION` | `View.EraseDrawing()` | `E` **(guarded)** | **no** — macOS uses `Shift`+`E` | X11 only |
+
+**Why the COM path exists.** PowerPoint's slideshow shortcuts are not merely useless outside a
+slideshow — one of them is actively dangerous:
+
+```
+Ctrl+P   in a slideshow            ->  pen
+         on an ordinary PPT window ->  PRINT DIALOG
+```
+
+Sending it blind is what put the Print dialog on screen mid-talk. VisionX now asks PowerPoint
+whether a slideshow is running before it arms the pen, and there are three answers, each handled
+differently:
+
+| Probe result | Meaning | What VisionX does |
+| --- | --- | --- |
+| `CONFIRMED` | Windows, PowerPoint is presenting | set the pen (COM; keystroke only if COM is unavailable) |
+| `DENIED` | Windows, PowerPoint is **not** presenting | **refuse** with a message naming the reason — no `Ctrl+P` |
+| `UNKNOWN` | not Windows, or no COM binding | send `Ctrl+P` — the historical behaviour, since there is no evidence of danger |
+
+Distinguishing `DENIED` from `UNKNOWN` is the whole fix: refusing everywhere would break every
+non-Windows setup, and allowing everywhere is the bug.
+
+Two more Windows specifics:
+
+- **Per-monitor DPI awareness** is enabled at start-up (`enable_dpi_awareness()`), before PyAutoGUI
+  caches the screen size. Every laptop ships scaled to 125–150%, and without this the virtual
+  pointer lands at roughly 80% of where the presenter is pointing.
+- **A small inter-key pause** (12 ms). PowerPoint's slideshow window silently drops keystrokes
+  delivered back-to-back with no gap at all.
+
+`GET /api/health` reports the slideshow probe, so a presenter can check before they start.
 
 Everything *except* the key-press layer is platform-neutral: MediaPipe detection, canonicalization,
 both recognizers, the debouncer, the intent gate, speech-to-text, the intent classifier, parameter
@@ -194,42 +278,161 @@ are same-origin. For a production build (`npm run build`), set `VITE_API_URL` to
 ## 4. The demo path
 
 1. **Register** → you are signed in and given the default gesture bindings.
-2. **Upload** a `.pdf`, `.pptx` or `.ppt`. VisionX reads the real slide count and renders previews
-   (PDFs directly; PowerPoint files need PowerPoint installed on the server to render previews —
-   gesture control works either way).
-3. Open the presentation → **Start session**. A `PresentationHistory` document is created (`READY`).
+2. **Upload** a `.pdf`, `.pptx` or `.ppt`. VisionX reads the real slide count and converts the deck
+   once (PDFs need no conversion; PowerPoint files are converted by the installed PowerPoint or by
+   LibreOffice). This is the step that makes the deck presentable.
+3. Open the presentation → **Start presentation**. A `PresentationHistory` document is created (`READY`).
 4. Pick the camera and the confidence gate, then start. The camera opens, MediaPipe begins tracking,
-   and the session screen goes live.
-5. **Open your slideshow in PowerPoint (F5)** — VisionX sends real key presses to whatever window has
-   focus.
-6. Gesture. The status strip shows the pose, a confidence pulse, the hold progress and the command
-   that fired. Pointer and ink render on the slide canvas.
-7. **End session** → the engine stops, ink is flushed to `Annotations`, and the session is written to
-   history with its duration, slide count and gesture breakdown.
-8. **History** and **Analytics** aggregate those documents — nothing on those pages is hardcoded.
+   and **a dedicated presentation window opens** — drag it to your projector or second screen. The
+   window you started from stays on your laptop as the control screen: camera preview, status, voice.
+5. Gesture. The presentation window shows the slide, the pointer and your ink; the control window
+   shows the pose, a confidence pulse, the hold progress and the command that fired.
+6. **End session** → the presentation window closes, the engine stops, ink is flushed to
+   `Annotations`, and the session is written to history with its duration, slide count and gesture
+   breakdown.
+7. **History** and **Analytics** aggregate those documents — nothing on those pages is hardcoded.
 
 Two optional detours off that path:
 
 - **Gesture settings → Train my gestures** enrols your hands and trains a personalized model
   (§6). Everything above keeps working identically whether or not you do this.
-- **Voice** turns on push-to-talk in the session screen (§7). A voice command travels the exact
-  same dispatcher as a gesture, so it lands in the same history and the same analytics.
+- **Voice** turns on continuous listening in the session screen (§7): say
+  "Vision <command> OK" at any point and it runs, with no interaction with the web app. A voice
+  command travels the exact same dispatcher as a gesture, so it lands in the same history and the
+  same analytics.
 
-Keyboard fallback during a session: `←` `→` `P` `A` `E` go through the exact same dispatcher.
+Keyboard fallback during a session: `←` `→` `P` `A` `E` `Esc` go through the exact same dispatcher
+(`Esc` is Reset; in the presentation window, where `Esc` closes the window, Reset is `X`).
+
+### The presentation window
+
+The presentation itself is a VisionX page (`frontend/src/pages/Present.jsx`) on `/present`, opened
+in its own browser window. It is not the VisionX application: no sidebar, no controls, no camera
+preview — the audience sees the deck.
+
+```
+   AT UPLOAD (once)                        AT PRESENTATION TIME (no conversion, no Office)
+   ────────────────                        ──────────────────────────────────────────────
+   .pptx                                   gesture ─┐
+     │ LibreOffice --headless                voice ─┼─► CommandDispatcher
+     ▼   (PowerPoint COM: optional        keyboard ─┘          │
+   PDF        legacy fallback)                                 ▼
+     │ PyMuPDF                                   WebPresentationController
+     ▼                                              (VisionX's own state)
+   PNG per slide  ─────────────────────────────────────────────┤
+                                                               ▼
+                                                    SSE ─► presentation window
+```
+
+**Nothing on the right-hand side involves Microsoft PowerPoint.** No process is launched, no window
+is focused, no keystroke or mouse event is synthesised, and no COM interface is opened. A `NEXT_SLIDE`
+increments VisionX's own slide number; the window redraws. The only external program VisionX ever
+runs is `soffice`, on the left, once per upload.
+
+Going through PDF is what keeps the deck faithful: LibreOffice does the layout with the real fonts,
+masters, themes and embedded media, so what the audience sees is the deck rather than a browser
+library's approximation of it. Slides are rendered at the window's own pixel width
+(`/api/presentations/<id>/render/<n>?w=`), cached on disk per (slide, width), and the neighbours of
+the current slide are prefetched while it is on screen — so a Next Slide gesture lands on an image
+the browser already has.
+
+**What this removed.** The controller behind the dispatcher is an interface
+(`presentation_controller/base.py`), so swapping `PowerPointController` for
+`WebPresentationController` changed nothing above it — the engine, the dispatcher, the voice
+pipeline and every route are identical. What changed is that the bottom of the stack is no longer
+the operating system:
+
+| Problem | Cause | Why it cannot happen now |
+| --- | --- | --- |
+| Print dialog opening mid-talk | blind `Ctrl+P`, which outside a slideshow means Print | no keystrokes are sent at all |
+| the pen refusing to arm | it needed a *running PowerPoint slideshow* to be safe | the pen is a flag on a canvas |
+| Clear Annotation doing nothing | the COM eraser refused with no slideshow | one event, one `clearRect` |
+| drawing not working | it needed a mouse button held for the whole stroke | a stroke is a list of points |
+| the mouse button left held down | a lost release stranded it on the desktop | there is no mouse button |
+| commands landing in the wrong window | whichever window had focus received them | nothing has focus to steal |
+
+The PowerPoint controller is still shipped and still tested; set
+`VISIONX_PRESENTATION_MODE=powerpoint` to drive a real PowerPoint instead. It is **isolated**, not
+merely unused: `PowerPointController` is imported inside the branch that asks for it, so a web-mode
+process never loads `presentation_controller.windows` (COM) or `presentation_controller.keyboard`
+(PyAutoGUI) at all.
+
+**How the independence is enforced.** `tests/test_no_powerpoint.py` is a regression suite whose only
+job is this property, because it is easy to reintroduce by accident — one convenience import at the
+top of a module is enough, and the symptom in production is not a test failure but a Print dialog in
+front of an audience. It checks four things:
+
+| Check | How |
+| --- | --- |
+| the import graph is clean | imports the web controller in a **subprocess** and inspects `sys.modules` — this process has already imported the PowerPoint controller for its own tests, so checking here would prove nothing |
+| a whole session is clean | builds a dispatcher in a subprocess, runs all twelve commands plus a pointer stream and a stroke, then inspects `sys.modules` — this catches a *lazy* import that only fires on one command |
+| the backend is clean | boots the actual Flask app with `VISIONX_PRESENTATION_MODE=web`, serves `/api/health`, inspects `sys.modules` |
+| no automation is reachable | poisons every `KeyboardBackend` and `PowerPointComBridge` method so any call fails naming the method, then runs every command — this holds even in a process that legitimately has PyAutoGUI loaded for legacy mode |
+
+Plus: `subprocess.run`/`Popen`/`call` are poisoned for the duration of a presentation, so nothing can
+launch an application behind our back.
+
+### Why the pointer is smooth
+
+Pointer movement is a **continuous** signal and slide changes are **discrete** ones, and the two
+need opposite handling. Conflating them is what made the old pointer lag:
+
+```
+slide change  ->  discrete  ->  debounce, cooldown, sustained release   (§5)
+pointer       ->  continuous ->  every frame, coalesced, interpolated
+```
+
+Three things were in the way, all of them removed:
+
+1. The pointer travelled inside the `telemetry` event, which is rate-limited to 12 Hz — an 83 ms
+   quantisation floor before a position even left the server. It now has **its own channel**
+   (`backend/services/event_bus.py`), published at camera frame rate.
+2. That channel shared one bounded queue with commands, so a browser falling behind received a
+   *backlog of stale positions*. The pointer channel is now a **single-slot mailbox**: publishing
+   overwrites what has not been read, so a slow client skips positions rather than lagging behind
+   them. Discrete events keep the queue, because losing a slide change is never acceptable.
+3. The browser re-rendered on every sample. The presentation window writes the pointer to a
+   `transform` and the ink to a canvas inside one `requestAnimationFrame`, **never through React
+   state**, and interpolates between samples so the dot moves continuously rather than stepping once
+   per network event.
+
 
 ---
 
 ## 5. Why gestures do not misfire
 
-A command fires only when **all three** conditions hold (`computer_vision/gesture_recognition/debouncer.py`):
+A command fires only when **all four** conditions hold:
+
+0. **Temporal smoothing** (`computer_vision/gesture_recognition/stabilizer.py`) — the pose that
+   reaches the command mapper is a plurality vote over the last 5 frames, not the latest frame's
+   classification. Two poses in the library differ by one bit — `INDEX_UP` (the pen) and
+   `INDEX_MIDDLE_UP` (the pointer) — so a middle finger that dips below the extension threshold for
+   a frame used to change which command you were giving. It cannot now: one or two stray frames are
+   outvoted. When no pose commands a plurality the stabilizer reports `UNKNOWN`, which is the
+   neutral state the debouncer already handles.
+
+Then, in `computer_vision/gesture_recognition/debouncer.py`:
 
 1. **Confidence gate** — the pose confidence clears the session threshold.
 2. **Temporal persistence** — the same command survives N consecutive frames (default 6).
-3. **Neutral state between repeats** — after a command fires, the same command cannot fire again until
-   a neutral frame occurs: no hand, an unrecognised pose, or any pose you have left unbound. This is
-   what stops one flick of the hand from skipping three slides.
+3. **Sustained neutral state between repeats** — after a command fires, the same command cannot fire
+   again until neutrality has been *held* for `release_frames` consecutive frames. The default is the
+   **full** persistence requirement — releasing a gesture takes as long as making one — because the
+   stabilizer needs a few frames to swing over to "no hand", so N dropped frames already produce
+   close to N neutral ones. Half of it left a ~66 ms margin, and a 100 ms MediaPipe dropout mid-hold
+   still advanced a second slide. Neutral means no hand, an unrecognised pose, or any pose you have
+   left unbound.
 
 A cooldown (default 900 ms) sits on top as a final guard.
+
+> **Why neutrality has to be held, not merely observed.** A single neutral frame used to re-arm the
+> repeat. That sounds harmless and is not: a held gesture does not produce a clean run of identical
+> frames — MediaPipe loses the hand for a frame, the model emits a runner-up class, the intent gate
+> neutralises an ambiguous frame. Any one of those unlocked the repeat, the streak rebuilt in a
+> fifth of a second, and the command fired again. Measured on a stream with one dropped frame in
+> twelve, a single held gesture produced **30 slide advances in 30 seconds**; with the hold rule it
+> produces **one**. `tests/test_gesture_stability.py::test_the_neutral_hold_rule_is_what_stops_the_deck_walking`
+> asserts both numbers against the same input, so the regression cannot come back quietly.
 
 With a personalized model there is a fourth: an **intent gate** (`computer_vision/ml/intent_gate.py`)
 rejects a frame whose top two classes are within 0.15 probability of each other. A hand the model
@@ -347,15 +550,96 @@ input. A corrupt or version-mismatched model is logged once and treated exactly 
 Optional, opt-in, per user. Off by default; turning it off changes nothing about gestures.
 
 ```
-microphone ─► MediaRecorder (push-to-talk) ─► POST /api/voice/utterance
-           ─► Whisper (local, pretrained)   ─► transcript
+microphone ─► MediaRecorder (continuous, cut on silence) ─► POST /api/voice/stream
+           ─► Whisper (local, pretrained, loaded at boot) ─► transcript
+           ─► wake-word machine ("Vision" … "OK")  ─► a command, or nothing at all
            ─► intent classifier (VisionX-trained) ─► intent + probability
            ─► parameter extraction (rule-based)   ─► slideNumber / count
            ─► confidence band ─► CommandIntent ─► the existing CommandDispatcher
 ```
 
+### Latency: where the seconds were
+
+The pipeline above is unchanged — the same Whisper, the same wake machine, the same trained intent
+model (§8 was explicit that it must be reused, and it is). What changed is *when* each stage runs.
+
+**1. The recorder waited on a clock, not on the presenter.** Audio was cut into fixed 3-second
+segments, so a command was not even uploaded until the window happened to close:
+
+```
+presenter says "…OK"
+     │
+     │   up to 3 s   ← waiting for a timer, with the audio already captured
+     ▼
+upload ─► Whisper ─► intent ─► dispatch
+```
+
+Segments now end **when the presenter stops talking**: 350 ms of silence closes the recorder and the
+audio goes up (`frontend/src/hooks/useContinuousVoice.js`). "OK" becomes a full stop the machine can
+hear. Speech that keeps going is still cut at a 2.5 s ceiling, so a command completed early in a long
+sentence is not held hostage by the rest of it. Silence is never uploaded at all — an empty Whisper
+pass costs as much as a real one and is where Whisper invents text.
+
+That one change removes the largest term, and — as importantly — removes its *variance*: the same
+command used to take 0.3 s or 3.3 s depending on where in the window it landed.
+
+**2. The models loaded on first use.** Both are process-wide singletons, which is right, but "first
+use" means the presenter's first command, in front of an audience — several seconds for that one,
+and fast for every one after it. `_prewarm_voice` (`backend/app.py`) loads both at boot on a daemon
+thread and calls Whisper's `warm_up()`, which existed and was never called: the first *inference* is
+slower than the rest because the runtime builds its graph on it. Set `VOICE_PREWARM=0` to opt out on
+a machine that will never use voice.
+
+**3. Ordinary speech does no work.** Almost every segment of a talk is not a command. It is matched
+against the wake vocabulary — a compiled regex — and dropped: nothing is classified, nothing is
+dispatched, nothing is written to MongoDB.
+
+Whisper's own settings were already tuned for this workload and are unchanged: `beam_size=1` (a
+three-word command needs no beam search), `vad_filter=True`, and `condition_on_previous_text=False`
+so each utterance is independent.
+
 The voice layer contains **no PowerPoint logic**. It cannot: the only way it can affect a slideshow
 is by handing a `CommandIntent` to the same dispatcher the gesture engine uses.
+
+### Continuous listening — "Vision … OK"
+
+The presenter turns the microphone on once, at the start of the talk, and never touches the web app
+again:
+
+```
+[Listening] ──"Vision"──► [Command mode] ──"go to next slide"──► "OK" ──► NEXT_SLIDE
+     ▲                                                                        │
+     └────────────────────────────────────────────────────────────────────────┘
+```
+
+`voice_assistant/wake/wake_word.py` is a **pure-text state machine**: transcripts in, decisions out,
+no audio and no model. It decides *when* there is something to classify; the trained model still
+decides what it means, with the same confidence bands as before. Nothing about the trained pipeline
+changed — continuous listening was built around it.
+
+- Both boundaries may arrive in one breath (`"Vision go to next slide OK"`) or across several
+  recorder segments (`"Vision"` / `"go to next slide"` / `"OK"`). Where the recorder's timer happens
+  to fall does not change what a command means.
+- Ordinary speech — including `"next slide please"` and `"ok, so the last slide showed…"` — never
+  reaches the intent model at all.
+- The wake word must be a whole word, and must be **addressed** rather than merely used. Two guards,
+  because getting this wrong is how a talk drives its own deck:
+  - No ordinary English word is a wake word, however close it sounds. *Envision* and *provision* were
+    accepted at first, and "we need to **provision** more servers and then move to the next slide,
+    okay" then executed `NEXT_SLIDE` at 0.85 confidence. The confidence gate cannot help there — the
+    captured words genuinely are a command.
+  - A wake word directly after a determiner or possessive is part of a sentence, not a summons, so
+    "our **vision** going forward…" and "the **vision** is simple…" are ignored. Genuine
+    mis-transcriptions (*visions*, *vision x*, *visionx*) still arm it.
+- A captured command is capped at 10 words. Every command VisionX can run fits in six, and a run-on
+  capture is far more likely to be ordinary speech that followed a stray wake word.
+- A capture that never ends times out after 12 s, so an accidental wake word cannot swallow the rest
+  of the talk.
+- **Continuous listening is not continuous recording.** Each segment is transcribed in memory and
+  discarded; silent segments are never uploaded at all.
+
+Push-to-talk (`POST /api/voice/utterance`) still exists and is unchanged — it is what the Voice
+Assistant settings screen uses to test a phrase.
 
 ### Speech-to-text — pretrained, not trained here
 
@@ -368,8 +652,8 @@ VisionX does not train a speech recogniser. `voice_assistant/speech/base.py` def
 | `NullSpeechRecognizer` | neither installed — fails with install instructions, never a stack trace |
 
 Audio never leaves the machine, which is the natural arrangement here: the backend already runs on
-the presenter's own computer, because it is that computer's keyboard it drives. Recording is
-push-to-talk and capped at 8 seconds — the microphone is never quietly listening through a talk.
+the presenter's own computer, because it is that computer's keyboard it drives. Segments are
+transcribed in memory and discarded; a segment below the silence threshold is never uploaded.
 
 ### Intent classifier — trained by VisionX
 
@@ -453,14 +737,25 @@ silently going somewhere the presenter did not ask for is worse than doing nothi
 
 ## 8. Live updates
 
-The browser opens **one Server-Sent Events connection** per session
-(`GET /api/engine/stream`). The engine rate-limits telemetry to ~12 events/second regardless of
-camera frame rate, so the UI is live without any frame-rate REST polling. The camera thumbnail is a
-separate MJPEG stream (`GET /api/engine/preview`) at 15 fps. Both accept the JWT as a query
-parameter because `EventSource` and `<img>` cannot send headers.
+The browser opens **one Server-Sent Events connection** per window
+(`GET /api/engine/stream`) — the control screen and the presentation window each have their own.
+Two kinds of traffic share it, with deliberately different delivery guarantees:
 
-Swapping SSE for WebSockets later touches exactly two files: `backend/services/event_bus.py` and
-`frontend/src/hooks/useEngineStream.js`.
+| | Rate | Delivery | Why |
+| --- | --- | --- | --- |
+| telemetry, commands, state, ink | ~12/s (rate-limited in the engine) | **queued**, oldest dropped only when a client stalls | losing a slide change is never acceptable |
+| pointer positions | camera frame rate | **coalesced** — a single slot, newest wins | a stale fingertip position is worse than none |
+
+Pointer events deliberately bypass the telemetry limiter: 12 Hz is visible as lag on something that
+has to follow a hand, while a discrete command at 30 Hz would just be noise. A browser that falls
+behind therefore *skips* positions rather than replaying old ones — see §4, "Why the pointer is
+smooth".
+
+The camera thumbnail is a separate MJPEG stream (`GET /api/engine/preview`) at 15 fps. All of them
+accept the JWT as a query parameter because `EventSource` and `<img>` cannot send headers.
+
+Swapping SSE for WebSockets later touches `backend/services/event_bus.py`, the stream route, and the
+two client hooks (`useEngineStream.js`, `usePresentationChannel.js`).
 
 ---
 
@@ -540,7 +835,7 @@ MongoDB collections (see `backend/models/schema.py`):
 | ---------------------- | --------------------------------------------- |
 | `users`                | name, email, bcrypt hash, profilePhoto, createdAt |
 | `presentations`        | userId, title, fileName, storedName, filePath, fileType, totalSlides, thumbnails, uploadedAt |
-| `gesture_preferences`  | one per user — the five pose bindings         |
+| `gesture_preferences`  | one per user — the six pose bindings          |
 | `presentation_history` | one per session — status, times, duration, slidesNavigated, annotationsMade, commandsFired, gestureCounts |
 | `annotations`          | presentationId, sessionId, slideNumber, annotationData, createdAt |
 | `personalization`      | one per user — multimodal opt-ins, consent, thresholds, model pointer |
@@ -574,7 +869,7 @@ Personalization is off by default and gated on **explicit, separate consent**.
 | | |
 | --- | --- |
 | **Hand landmarks** | Coordinates, never images. No frame is ever written to disk. Collection requires `gestureLearningConsent`; turning it off stops collection immediately (it does not delete what exists — that is a separate, deliberate action). |
-| **Raw audio** | **Never stored.** Transcribed in memory and discarded. Recording is push-to-talk and capped at 8 seconds. |
+| **Raw audio** | **Never stored.** Transcribed in memory and discarded — with continuous listening as with push-to-talk. Nothing is written to disk, and silent segments are never uploaded at all. |
 | **Transcripts** | Command-level telemetry only, and only while `voiceTranscriptRetention` is on. Turn it off and just the intent, confidence and outcome are recorded. |
 | **Delete** | *Delete model* · *Delete recordings* · *Delete all learning data* · *Clear voice history* — all in the UI, all available independently. |
 
@@ -592,19 +887,25 @@ hand-authored voice intent text, which contains no user data.
 
 ```bash
 pytest tests/                       # 138 unit + integration tests, ~4 s, no database needed
-cd backend && python tests/test_api_flow.py   # 84 end-to-end API assertions (needs MongoDB)
+cd backend && python tests/test_api_flow.py   # 96 end-to-end API assertions (needs MongoDB)
 ```
 
-`tests/` needs no MongoDB, Flask, webcam, MediaPipe or PyAutoGUI. The only fake is the keyboard
-backend, which subclasses the real one and records key presses instead of sending them — so a
-signature change in `KeyboardBackend` breaks the tests loudly.
+`tests/` needs no MongoDB, Flask, webcam, MediaPipe or PyAutoGUI. Two fakes stand at the OS
+boundary and nowhere else: `FakeKeyboard` subclasses the real backend and records key presses
+instead of sending them — so a signature change in `KeyboardBackend` breaks the tests loudly — and
+`FakeCom` scripts what PowerPoint would have answered, including the three slideshow states.
 
 | File | Covers |
 | --- | --- |
 | `test_canonicalization.py` | translation / scale / rotation invariance, the exact canonical frame, aspect handling, malformed input |
 | `test_gesture_model.py` | class list derivation, split-by-recording (and leakage assertion), the quality gate, the collector, artifact round-trip, corrupt- and stale-version model refusal, inference, graceful degradation, the intent gate, every fallback path |
 | `test_voice_intent.py` | normalisation, number parsing, slide-vs-count disambiguation, intent classification, `NO_COMMAND` on ordinary speech, threshold bands, out-of-range rejection, the speech-recognizer interface |
-| `test_integration.py` | the numbered scenarios below, plus regressions: the five bindable commands, gesture toggling, debouncer semantics, boundary clamping, controller-capability fallback |
+| `test_integration.py` | the numbered scenarios below, plus regressions: the bindable commands, gesture toggling, debouncer semantics, boundary clamping, controller-capability fallback |
+| `test_gesture_stability.py` | the repeat bug from every direction (dropped frame, ambiguous frame, unmapped pose), the neutral-hold rule measured against the old behaviour on identical input, the stabilizer's vote, warm-up, tie-breaking and pointer pass-through |
+| `test_powerpoint_windows.py` | that the pointer can never emit `Ctrl+P` in **any** machine state, the pen refusal without a slideshow, drawing as a drag, erase through COM and its guarded fallback, pen-lift on every exit path, COM/keystroke navigation, and that the platform layer is inert off Windows |
+| `test_wake_word.py` | the wake-word machine exhaustively — ordinary speech, a talk that is *about* vision, segmentation, mis-transcriptions, restarts, timeouts, two commands in one segment, concurrent callers — and that its output actually classifies on the trained model |
+| `test_voice_continuous.py` | the service seam: continuous listening reaching the real interpreter and the real dispatcher, per-user state, and voice/gesture sharing one slide counter |
+| `test_end_to_end.py` | the fixes.md §6 verification list, one test each, driving `GestureEngine.decide()` — the same method the camera loop calls — with time advanced per frame so the 900 ms cooldown runs at its real value |
 
 `backend/tests/test_api_flow.py` covers the whole API including the new endpoints. Its voice
 section uses a **voice-only session**, which needs no camera, so the full
@@ -750,10 +1051,15 @@ held-out data rather than picked by feel.
 | Symptom | Fix |
 | ------- | --- |
 | `No camera found at index 0` | Close Zoom/Teams/Camera app, check Windows *Camera privacy* settings, or pick a different camera on the session setup screen. |
-| Session starts but slides do not move | The slideshow window must have focus. VisionX sends real key presses to the foreground window. |
+| Session starts but no presentation window opens | Your browser blocked the pop-up. Allow pop-ups for VisionX and click the **Presentation window** button in the control bar. |
+| The presentation window shows "This slide could not be rendered" | A `.pptx` needs **LibreOffice** on the server to convert it once. Check `pptxConverter.ready` in `GET /api/health`, install LibreOffice (or set `VISIONX_SOFFICE_PATH`), then re-upload the deck. A `.pdf` never needs a converter. Nothing is needed at presentation time. |
+| Does presenting require Microsoft PowerPoint? | **No.** Web mode never opens, controls, focuses or requires it — see §4. PowerPoint COM is an optional *upload-time* fallback only, and `VISIONX_PPTX_CONVERTER=libreoffice` disables even that. |
+| Slides do not move | Check the control window's status strip: if the command fired there but the presentation window did not follow, the window has lost its stream — it reconnects on its own, and the status line says "Reconnecting…". |
 | Gestures never fire | Lower the confidence gate on the setup screen, improve lighting, and keep your whole hand in frame. |
 | `Could not reach MongoDB` | Check `MONGO_URI` and that your IP is allow-listed in Atlas → Network Access. |
-| No slide previews for a `.pptx` | Preview rendering needs PowerPoint (via `comtypes`) on the server. PDFs always render. Gesture control is unaffected. |
+| No slide previews for a `.pptx` | Conversion needs LibreOffice on the server (PowerPoint COM is only a fallback). PDFs always render. Set `VISIONX_SOFFICE_PATH` if LibreOffice is installed somewhere unusual. |
+| The first voice command of a talk is slow, later ones are fast | The models loaded on first use instead of at boot. Check the log for `Voice pipeline warm`; if it is missing, `VOICE_PREWARM` is `0` or no speech backend is installed. |
+| The pointer trails your hand | Raise `CV_POINTER_SMOOTHING` towards 1 (it follows more closely at the cost of some jitter). If the whole UI is behind, the machine is dropping camera frames — check `fps` in the status strip. |
 | Hand model missing | `python scripts/download_model.py` |
 | "The voice intent model is not available" | `python -m voice_assistant.training.train_intent_model` |
 | "No speech-to-text backend is installed" | `pip install -r backend/requirements-voice.txt`, then restart the API. The first utterance downloads the Whisper weights (~75 MB for `base.en`). |
@@ -768,15 +1074,23 @@ held-out data rather than picked by feel.
 
 Deliberately **not** included: Kubernetes, microservices, Redis/Kafka, a custom-trained speech
 recogniser (Whisper is pretrained and reimplementing it would be worse in every dimension), and
-Google Slides support — `PresentationController` is an abstract base with `PowerPointController`
-implemented today and room for a `GoogleSlidesController` later, but VisionX does not claim support
-that does not exist.
+Google Slides support — `PresentationController` is an abstract base with
+`WebPresentationController` (the default) and `PowerPointController` implemented today, and room for
+a `GoogleSlidesController` later, but VisionX does not claim support that does not exist.
 
 **Limitations, stated rather than hidden:**
 
 - The personalized gesture model's accuracy on real hands is **unmeasured** here — see §14.
 - `START_PRESENTATION` / `END_PRESENTATION` are the voice model's weakest pair.
-- Only one session runs at a time: one webcam, one desktop.
+- Only one session runs at a time: one webcam, one deck.
+- The presentation window renders **slide images**, so a deck's animations, transitions, embedded
+  video and speaker notes do not play. This is the deliberate cost of not driving PowerPoint: the
+  layout, fonts and content are exactly the presenter's own, and every failure mode in §4's table
+  is gone, but a build-by-build animation is not reproduced. A deck that depends on animation should
+  run in `VISIONX_PRESENTATION_MODE=powerpoint`.
+- A `.pptx` still needs **LibreOffice once, at upload**, to convert to PDF. This is the only
+  remaining rendering dependency, it is not Microsoft Office, and nothing is needed at presentation
+  time. A `.pdf` needs nothing at any point.
 - Voice is English-only by default (`VISIONX_WHISPER_MODEL=base.en`); set a multilingual Whisper
   model to change that, but the intent classifier is trained on English utterances.
 - **Multimodal fusion is a seam, not a feature.** `multimodal/context.py` publishes the live
@@ -785,3 +1099,23 @@ that does not exist.
   contains no deictic utterances, because shipping commands the dispatcher cannot execute would be
   worse than leaving the seam empty and saying so.
 - Enrolment takes real time: 11 classes × 3 recordings × 60 frames is roughly 10 minutes.
+
+---
+
+## 17. Configuration reference — presentation surface and latency
+
+Environment variables, all optional, all read once at startup from `backend/.env`.
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `VISIONX_PRESENTATION_MODE` | `web` | `web` renders the deck in VisionX's own presentation window. `powerpoint` drives the PowerPoint installed on this machine, as VisionX did before — keystrokes, COM and the slideshow guard. |
+| `VISIONX_SLIDE_RENDER_WIDTH` | `1920` | Default pixel width for a rendered slide when the client does not ask for one. |
+| `VISIONX_SLIDE_RENDER_MAX_WIDTH` | `2560` | Ceiling. A render is never upscaled past the slide's own resolution either way. |
+| `VISIONX_PPTX_CONVERTER` | `auto` | Which backend converts `.pptx` → PDF. `auto` tries **LibreOffice first**, then PowerPoint COM. `libreoffice` forbids PowerPoint outright — use this to enforce the guarantee rather than merely prefer it. `powerpoint` is legacy and needs Microsoft Office. |
+| `VISIONX_SOFFICE_PATH` | *(search)* | Where to find LibreOffice. Empty means: `PATH`, then the usual install locations. |
+| `CV_POINTER_SMOOTHING` | `0.5` | Fingertip smoothing, 0–1. Higher follows the hand more closely; lower is steadier. Governs the **continuous** pointer stream only — the debounce settings never touch it. |
+| `VOICE_PREWARM` | `1` | Load Whisper and the intent model at boot on a background thread, and run Whisper's warm-up pass. Set to `0` on a machine that will never use voice. |
+
+The gesture stability settings (`CV_DEBOUNCE_FRAMES`, `CV_COOLDOWN_MS`, `CV_STABILIZER_WINDOW`,
+`CV_RELEASE_FRAMES`) are documented in §5 and are unchanged by the move to the web presentation —
+they govern discrete commands, which behave identically on either surface.

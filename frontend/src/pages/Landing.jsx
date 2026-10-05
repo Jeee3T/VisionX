@@ -26,7 +26,7 @@ const PIPELINE = [
   { title: 'Detect', text: 'MediaPipe extracts 21 hand landmarks per frame.' },
   { title: 'Recognise', text: 'Finger geometry produces a pose and a confidence score.' },
   { title: 'Filter', text: 'Confidence gate + debounce + neutral state block false positives.' },
-  { title: 'Execute', text: 'The dispatcher drives PowerPoint through PyAutoGUI.' },
+  { title: 'Execute', text: 'The dispatcher drives the presentation VisionX is showing.' },
 ]
 
 export default function Landing() {

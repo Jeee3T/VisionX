@@ -6,6 +6,18 @@ const MARGIN = 0.15 // must match PointerController - the hand's comfortable rea
 
 const stretch = (value) => Math.min(1, Math.max(0, (value - MARGIN) / (1 - 2 * MARGIN)))
 
+// A stroke's points are in one of two spaces, and they must not be conflated:
+//
+//   'camera'  the fingertip over the camera frame - inset by MARGIN, so it is
+//             stretched back over the slide when drawn.
+//   'slide'   already over the slide - a mouse or touch stroke. Stretching it
+//             moves it away from where it was drawn.
+//
+// The space is stored on the stroke. This used to be inferred from a `source`
+// field that `annotation_service` strips before writing, so the check was dead
+// and every mouse stroke came back stretched - i.e. in the wrong place.
+const needsStretch = (stroke) => (stroke?.space || 'camera') === 'camera'
+
 /**
  * The stage owns ~90% of the viewport. Annotations and the pointer render
  * directly on the slide canvas - never in a side panel.
@@ -70,10 +82,10 @@ export default function SlideStage({
 
     savedStrokes.forEach((stroke) => {
       const data = stroke.annotationData || stroke
-      drawStroke(data.points, data.colour, data.width, stroke.source !== 'mouse')
+      drawStroke(data.points, data.colour, data.width, needsStretch(data))
     })
-    drawStroke(liveStroke.current, '#ef4444', 4, true)
-    drawStroke(mouseStroke.current, '#ef4444', 4, false)
+    drawStroke(liveStroke.current, '#ef4444', 4, true)    // fingertip: camera space
+    drawStroke(mouseStroke.current, '#ef4444', 4, false)  // cursor: slide space
   }, [savedStrokes, size])
 
   useEffect(() => {
@@ -129,7 +141,10 @@ export default function SlideStage({
     const points = mouseStroke.current
     mouseStroke.current = []
     if (points.length > 1 && onStrokeComplete) {
-      onStrokeComplete({ points, colour: '#ef4444', width: 4, source: 'mouse' })
+      // `space`, not `source`: the backend stores this one, and it is what
+      // decides whether the stroke is stretched when it is replayed. A cursor
+      // stroke is already in the slide's own coordinates.
+      onStrokeComplete({ points, colour: '#ef4444', width: 4, space: 'slide' })
     }
     redraw()
   }
@@ -167,8 +182,8 @@ export default function SlideStage({
             <p className="text-5xl font-semibold tracking-tight text-white/85">{slide}</p>
             <p className="mt-2 max-w-sm text-sm text-white/45">
               {presentation
-                ? 'Gestures are driving your slideshow in PowerPoint. Open it fullscreen on this machine.'
-                : 'Free session - gestures control whatever is on screen.'}
+                ? 'This slide could not be previewed here. The presentation window is what your audience sees.'
+                : 'Free session - no deck is bound to this session.'}
             </p>
           </div>
         </div>

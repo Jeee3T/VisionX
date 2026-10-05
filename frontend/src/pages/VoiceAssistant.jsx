@@ -168,7 +168,9 @@ export default function VoiceAssistant() {
                     Enable the voice assistant
                   </span>
                   <span className="mt-0.5 block text-xs text-ink-500">
-                    Adds push-to-talk to the session screen. Gesture control is unaffected either way.
+                    Adds continuous listening to the session screen: say &ldquo;Vision &hellip; OK&rdquo;
+                    and the command runs, with no need to come back here. Gesture control is
+                    unaffected either way.
                   </span>
                 </span>
               </label>

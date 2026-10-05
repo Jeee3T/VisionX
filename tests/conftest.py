@@ -56,12 +56,106 @@ class FakeKeyboard(KeyboardBackend):
         self._fail_if_unavailable()
         self.log.append(("move", x, y))
 
+    def mouse_down(self, button: str = "left") -> None:
+        self._fail_if_unavailable()
+        if self._mouse_down:
+            return
+        self._mouse_down = True
+        self.log.append(("mouseDown", button))
+
+    def mouse_up(self, button: str = "left") -> None:
+        if not self._mouse_down:
+            return
+        self._mouse_down = False
+        self._fail_if_unavailable()
+        self.log.append(("mouseUp", button))
+
     def screen_size(self) -> tuple[int, int]:
         self._fail_if_unavailable()
         return (1920, 1080)
 
     def keys(self) -> list[str]:
         return [entry[1] for entry in self.log if entry[0] == "press"]
+
+    def hotkeys(self) -> list[tuple]:
+        return [entry[1] for entry in self.log if entry[0] == "hotkey"]
+
+
+class FakeCom:
+    """Stands in for PowerPointComBridge with a scriptable slideshow state.
+
+    Three configurations matter, and each corresponds to a real machine:
+
+        connected + running    Windows, PowerPoint presenting  -> CONFIRMED
+        connected + not running Windows, deck open but not presenting -> DENIED
+        not connected          no COM binding / not Windows     -> UNKNOWN
+    """
+
+    def __init__(self, connected: bool = False, slideshow: bool = False,
+                 slides: int = 20):
+        self.connected = connected
+        self.slideshow = slideshow
+        self.slides = slides
+        self.pointer_type_value: int | None = None
+        self.erased = 0
+        self.calls: list[tuple] = []
+
+    # --- the PowerPointComBridge interface -----------------------------------
+    def probe(self) -> str:
+        from presentation_controller.windows import (
+            SLIDESHOW_CONFIRMED,
+            SLIDESHOW_DENIED,
+            SLIDESHOW_UNKNOWN,
+        )
+
+        if not self.connected:
+            return SLIDESHOW_UNKNOWN
+        return SLIDESHOW_CONFIRMED if self.slideshow else SLIDESHOW_DENIED
+
+    def invalidate(self) -> None:
+        self.calls.append(("invalidate",))
+
+    def _live(self) -> bool:
+        return self.connected and self.slideshow
+
+    def set_pointer_type(self, pointer_type: int) -> bool:
+        self.calls.append(("pointerType", pointer_type))
+        if not self._live():
+            return False
+        self.pointer_type_value = int(pointer_type)
+        return True
+
+    def pointer_type(self) -> int | None:
+        return self.pointer_type_value if self._live() else None
+
+    def erase_ink(self) -> bool:
+        self.calls.append(("erase",))
+        if not self._live():
+            return False
+        self.erased += 1
+        return True
+
+    def next_slide(self) -> bool:
+        self.calls.append(("next",))
+        return self._live()
+
+    def previous_slide(self) -> bool:
+        self.calls.append(("previous",))
+        return self._live()
+
+    def goto_slide(self, number: int) -> bool:
+        self.calls.append(("goto", int(number)))
+        return self._live()
+
+    def slide_count(self) -> int | None:
+        return self.slides if self.connected else None
+
+    def activate(self) -> bool:
+        self.calls.append(("activate",))
+        return self._live()
+
+    def describe(self) -> dict:
+        return {"fake": True, "connected": self.connected, "slideshow": self.slideshow}
 
 
 @pytest.fixture
@@ -70,14 +164,41 @@ def keyboard() -> FakeKeyboard:
 
 
 @pytest.fixture
-def dispatcher(keyboard):
+def com() -> FakeCom:
+    """No COM binding, i.e. the UNKNOWN case - what the dev machines and CI see."""
+    return FakeCom(connected=False)
+
+
+def build_dispatcher(keyboard, com=None, total_slides: int = 20):
     from presentation_controller.annotation import AnnotationController
     from presentation_controller.dispatcher import CommandDispatcher
     from presentation_controller.powerpoint import PowerPointController
 
-    instance = CommandDispatcher(PowerPointController(keyboard), AnnotationController())
-    instance.bind_presentation(current_slide=1, total_slides=20)
+    controller = PowerPointController(keyboard, com=com if com is not None else FakeCom())
+    instance = CommandDispatcher(controller, AnnotationController())
+    instance.bind_presentation(current_slide=1, total_slides=total_slides)
     return instance
+
+
+@pytest.fixture
+def dispatcher(keyboard, com):
+    return build_dispatcher(keyboard, com)
+
+
+@pytest.fixture
+def presenting():
+    """Windows with PowerPoint actually presenting - the real deployment."""
+    return FakeCom(connected=True, slideshow=True)
+
+
+@pytest.fixture
+def not_presenting():
+    """Windows with PowerPoint open but NOT presenting.
+
+    This is the configuration in which Ctrl+P means Print, and therefore the one
+    every pen test has to cover.
+    """
+    return FakeCom(connected=True, slideshow=False)
 
 
 @pytest.fixture(scope="session")
